@@ -1,0 +1,25 @@
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
+
+const styles = StyleSheet.create({
+  page: { padding: 30, fontSize: 12 },
+  header: { fontSize: 18, marginBottom: 10, fontWeight: 'bold' },
+  row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 }
+});
+
+const MyDocument = ({ data }) => (
+  <Document>
+    <Page size="A4" style={styles.page}>
+      <Text style={styles.header}>SHALIMAR ROLLER FLOUR MILL</Text>
+      <Text style={{ marginBottom: 15 }}>Payment Advice Report</Text>
+      <View style={styles.row}>
+        <Text>Party: {data.partyName}</Text>
+        <Text>Date: {data.date}</Text>
+      </View>
+    </Page>
+  </Document>
+);
+
+// In your main component button:
+<PDFDownloadLink document={<MyDocument data={formData} />} fileName="payment-advice.pdf">
+  {({ loading }) => (loading ? 'Generating...' : 'Print PDF')}
+</PDFDownloadLink>
