@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+  html {
+    /* Standard default is 16px. Setting it to 18px or 20px scales all text on the page */
+    font-size: 20px; 
+  }
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+body {
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
