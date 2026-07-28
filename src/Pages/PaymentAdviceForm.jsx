@@ -1,16 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Printer,
-  FileSpreadsheet,
-  RotateCcw,
-  Save,
-  Trash2,
-  Search,
-  XCircle,
-  Calculator,
-  Building2,
-  Receipt,
-} from "lucide-react";
+import {Printer, FileSpreadsheet, RotateCcw, Save, Trash2, Search, XCircle, Calculator, Building2, Receipt} from "lucide-react";
 import * as XLSX from "xlsx";
 import html2pdf from "html2pdf.js";
 import shalimarLogo from "../Images/shalimarLogo.png";
@@ -57,7 +46,7 @@ export default function PaymentAdviceForm() {
 
   // Deductions State
   const [deductions, setDeductions] = useState({
-    cashDiscountPercent: 4,
+    cashDiscountPercent: 0,
     unloading: 0,
     cashPaid: 0,
     shortage: 0,
@@ -126,6 +115,7 @@ export default function PaymentAdviceForm() {
     }
   };
 
+  /*Excel Export */
   const handleExportExcel = () => {
     const exportData = [
       { Category: "Advice No", Value: formData.adviceNo },
@@ -142,6 +132,7 @@ export default function PaymentAdviceForm() {
     XLSX.writeFile(workbook, `Payment_Advice_${formData.adviceNo}.xlsx`);
   };
 
+  /**PDF Export */
   const handleExportPDF = () => {
     const element = document.getElementById("printable-area");
     const opt = {
@@ -156,7 +147,7 @@ export default function PaymentAdviceForm() {
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 font-sans select-none">
-      <header className="sticky top-0 z-50 w-full bg-white px-8 py-4 flex flex-col md:flex-row justify-between items-center shadow-md border-b border-slate-800">
+      <header className="sticky top-0 z-50 w-full bg-white px-6 py-2 flex flex-col md:flex-row justify-between items-center shadow-md border-b border-slate-800">
         <div className="flex items-center space-x-3">
           <div>
             <img
@@ -168,8 +159,8 @@ export default function PaymentAdviceForm() {
         </div>
 
         <div className="text-center">
-          <p className="text-lg text-black font-medium">
-            Payment Advice Management System
+          <p className="text-xl text-black font-medium">
+            Payment Advice Manager
           </p>
         </div>
 
@@ -181,6 +172,7 @@ export default function PaymentAdviceForm() {
           </div>
         </div>
       </header>
+
       <main className="flex-1 p-6">
         <div
           id="printable-area"
@@ -316,7 +308,77 @@ export default function PaymentAdviceForm() {
                     className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    Received Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.receivedDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, receivedDate: e.target.value })
+                    }
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+
               </div>
+            </section>
+
+            <section className="grid grid-cols-3 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  Payment Mode
+                </label>
+                <select
+                  value={formData.paymentMode}
+                  onChange={(e) =>
+                    setFormData({ ...formData, paymentMode: e.target.value })
+                  }
+                  className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                >
+                  <option value="">Select</option>
+                  <option value="DD">DD</option>
+                  <option value="Cheque">Cheque</option>
+                  <option value="Cash">Cash</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  Chq/DD No.
+                </label>
+                <input
+                  type="number"
+                  value={formData.chqNo}
+                  onChange={(e) =>
+                    setFormData({ ...formData, chqNo: e.target.value })
+                  }
+                  className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.chqDate}
+                  onChange={(e) =>
+                    setFormData({ ...formData, chqDate: e.target.value })
+                  }
+                  className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
+
+              <div>
+
+              </div>
+
+
+
             </section>
 
             {/* SECTION 2: GRID LAYOUT (ITEMS TABLE & DEDUCTIONS) */}
@@ -643,41 +705,41 @@ export default function PaymentAdviceForm() {
         </div>
       </main>
       <footer className="sticky bottom-0 z-50 bg-slate-50 px-6 py-4 border-t border-slate-200 flex flex-wrap gap-3 justify-between items-center">
-            <button
-              onClick={handleReset}
-              className="flex items-center gap-1.5 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-sm transition"
-            >
-              <RotateCcw className="w-4 h-4" /> Reset
-            </button>
+        <button
+          onClick={handleReset}
+          className="flex items-center gap-1.5 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition"
+        >
+          <RotateCcw className="w-4 h-4" /> Reset
+        </button>
 
-            <div className="flex flex-wrap gap-2">
-              <button
+        <div className="flex flex-wrap gap-2">
+          {/* <button
                 onClick={handleExportExcel}
                 className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm shadow transition"
               >
                 <FileSpreadsheet className="w-4 h-4" /> Excel Export
-              </button>
+              </button> */}
 
-              <button
-                onClick={handleExportPDF}
-                className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-sm shadow transition"
-              >
-                <Printer className="w-4 h-4" /> Print PDF
-              </button>
+          <button
+            onClick={handleExportPDF}
+            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-xs shadow transition"
+          >
+            <Printer className="w-4 h-4" /> Print PDF
+          </button>
 
-              <button className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg text-sm transition">
-                <Search className="w-4 h-4" /> Search
-              </button>
+          <button className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg text-xs transition">
+            <Search className="w-4 h-4" /> Search
+          </button>
 
-              <button className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-sm shadow transition">
-                <Trash2 className="w-4 h-4" /> Delete
-              </button>
+          <button className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs shadow transition">
+            <Trash2 className="w-4 h-4" /> Delete
+          </button>
 
-              <button className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm shadow transition">
-                <Save className="w-4 h-4" /> Save Record
-              </button>
-            </div>
-          </footer>
+          <button className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs shadow transition">
+            <Save className="w-4 h-4" /> Save Record
+          </button>
+        </div>
+      </footer>
     </div>
   );
 }
