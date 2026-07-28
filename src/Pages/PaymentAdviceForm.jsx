@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from "react";
-import {Printer, FileSpreadsheet, RotateCcw, Save, Trash2, Search, XCircle, Calculator, Building2, Receipt} from "lucide-react";
+import {
+  Printer,
+  FileSpreadsheet,
+  RotateCcw,
+  Save,
+  Trash2,
+  Search,
+  XCircle,
+  Calculator,
+  Building2,
+  Receipt,
+} from "lucide-react";
 import * as XLSX from "xlsx";
 import html2pdf from "html2pdf.js";
 import shalimarLogo from "../Images/shalimarLogo.png";
@@ -173,7 +184,7 @@ export default function PaymentAdviceForm() {
         </div>
       </header>
 
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-12">
         <div
           id="printable-area"
           className="max-w-7xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden"
@@ -182,57 +193,73 @@ export default function PaymentAdviceForm() {
             {/* SECTION 1: PARTY & TRANSACTION DETAILS */}
             <section className="bg-slate-50 p-4 rounded-lg border border-slate-200">
               <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-2">
-                <Receipt className="w-4 h-4 text-indigo-600" /> Transaction Overview
+                <Receipt className="w-4 h-4 text-indigo-600" /> Transaction
+                Overview
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                <div className="w-64">
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
                     Location
                   </label>
-                  <select
-                    value={formData.location}
-                    onChange={(e) =>
+                  <input
+                    list="location-list"
+                    className="w-full border border-slate-300 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500"
+                    placeholder="Type or select Location..."
+                     onChange={(e) =>
                       setFormData({ ...formData, location: e.target.value })
                     }
-                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                  <datalist
+                    id="location-list"
+                    value={formData.location}
                   >
-                    <option value="">Select Location</option>
-                    <option value="Main Warehouse">Main Warehouse</option>
-                    <option value="Mill Unit 1">Mill Unit 1</option>
-                  </select>
+                    <option value="Hyderabad" />
+                    <option value="Chennai" />
+                  </datalist>
                 </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                <div className="w-64">
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
                     Party Name
                   </label>
                   <input
-                    type="text"
-                    value={formData.partyName}
+                    list="party-list"
+                    className="w-full border border-slate-300 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500"
+                    placeholder="Type or select party..."
                     onChange={(e) =>
                       setFormData({ ...formData, partyName: e.target.value })
                     }
-                    placeholder="Enter Party Name"
-                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                   />
+                  <datalist
+                    id="party-list"
+                    value={formData.partyName}
+                  >
+                    <option value="Shalimar Roller Flour Mill" />
+                    <option value="National Traders" />
+                    <option value="Super Grain Suppliers" />
+                    <option value="Apex Food Products" />
+                  </datalist>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">
-                    Broker
+                <div className="w-64">
+                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                    Broker Name
                   </label>
-                  <select
-                    value={formData.broker}
+                  <input
+                    list="Broker-list"
+                    className="w-full border border-slate-300 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500"
+                    placeholder="Type or select broker..."
                     onChange={(e) =>
                       setFormData({ ...formData, broker: e.target.value })
                     }
-                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                  <datalist
+                    id="Broker-list"
+                    value={formData.broker}
                   >
-                    <option value="">Select Broker</option>
-                    <option value="Broker A">Broker A</option>
-                    <option value="Broker B">Broker B</option>
-                  </select>
+                    <option value="Broker 1" />
+                    <option value="Broker 2" />
+                  </datalist>
                 </div>
 
                 <div>
@@ -245,7 +272,7 @@ export default function PaymentAdviceForm() {
                     onChange={(e) =>
                       setFormData({ ...formData, accountNo: e.target.value })
                     }
-                    className="w-full px-3 py-1.5 bg-amber-50 border border-amber-300 text-amber-900 font-semibold rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full px-3 py-1 bg-amber-50 border border-amber-300 text-amber-900 font-semibold rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                   />
                 </div>
 
@@ -322,7 +349,6 @@ export default function PaymentAdviceForm() {
                     className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                   />
                 </div>
-
               </div>
             </section>
 
@@ -373,12 +399,35 @@ export default function PaymentAdviceForm() {
                 />
               </div>
 
-              <div>
+              <div className="grid grid-cols-3 gap-4 col-span-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    Bank Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.bankName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, chqDate: e.target.value })
+                    }
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
 
+                 <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    Bank Code
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.bankCode}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bankCode: e.target.value })
+                    }
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
               </div>
-
-
-
             </section>
 
             {/* SECTION 2: GRID LAYOUT (ITEMS TABLE & DEDUCTIONS) */}
