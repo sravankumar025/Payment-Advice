@@ -1,0 +1,248 @@
+import React from "react";
+export default function PrintableInvoice({ data }) {
+  const items = Array.isArray(data.items) ? data.items : [];
+  const qualityDiffs = Array.isArray(data.qualityDiffs) ? data.qualityDiffs : [];
+  const itemRows = items.map((item, index) => {
+    const qty = parseFloat(item.qty) || 0;
+    const rate = parseFloat(item.rate) || 0;
+    const amount = qty * rate;
+    return {
+      ...item,
+      amount: amount.toFixed(2),
+      qty: item.qty || "0",
+      rate: item.rate || "0",
+      index: index + 1,
+    };
+  });
+
+  const qualityRows = data.qualityDiffs.map((row, index) => {
+    const qty = parseFloat(row.qty) || 0;
+    const rate = parseFloat(row.rate) || 0;
+    const amount = qty * rate;
+    return {
+      ...row,
+      amount: amount.toFixed(2),
+      qty: row.qty || "0",
+      rate: row.rate || "0",
+      index: index + 1,
+    };
+  });
+
+  return (
+    <div className="bg-white text-black font-sans" style={{ width: "100%" }}>
+      <div className="border border-slate-300 p-6 rounded-lg">
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h1 className="text-3xl font-bold uppercase tracking-wide">
+              PAYMENT ADVICE
+            </h1>
+            <p className="text-sm text-slate-500 mt-2">
+              Shalimar Roller Flour Mill
+            </p>
+            <p className="text-sm text-slate-500">Payment Advice Document</p>
+          </div>
+          <div className="text-right text-sm">
+            <div className="mb-2">
+              <span className="block font-semibold text-slate-700">
+                Advice No.
+              </span>
+              <span>{data.adviceNo}</span>
+            </div>
+            <div className="mb-2">
+              <span className="block font-semibold text-slate-700">Date</span>
+              <span>{data.date}</span>
+            </div>
+            <div>
+              <span className="block font-semibold text-slate-700">
+                Ref No.
+              </span>
+              <span>{data.refNo || "-"}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+          <div className="space-y-2 bg-slate-50 p-4 rounded">
+            <p className="font-semibold text-slate-700">Customer Details</p>
+            <p>
+              <span className="font-semibold">Party:</span> {data.partyName || "-"}
+            </p>
+            <p>
+              <span className="font-semibold">Location:</span> {data.location || "-"}
+            </p>
+            <p>
+              <span className="font-semibold">Account No.:</span> {data.accountNo || "-"}
+            </p>
+            <p>
+              <span className="font-semibold">Broker:</span> {data.broker || "-"}
+            </p>
+            <p>
+              <span className="font-semibold">Outstanding Bill No.:</span> {data.outstandingBillNo || "-"}
+            </p>
+          </div>
+          <div className="space-y-2 bg-slate-50 p-4 rounded">
+            <p className="font-semibold text-slate-700">Payment Details</p>
+            <p>
+              <span className="font-semibold">Payment Mode:</span> {data.paymentMode || "-"}
+            </p>
+            <p>
+              <span className="font-semibold">Chq/DD No.:</span> {data.chqNo || "-"}
+            </p>
+            <p>
+              <span className="font-semibold">Chq/DD Date:</span> {data.chqDate || "-"}
+            </p>
+            <p>
+              <span className="font-semibold">Bank Name:</span> {data.bankName || "-"}
+            </p>
+            <p>
+              <span className="font-semibold">Bank Code:</span> {data.bankCode || "-"}
+            </p>
+            <p>
+              <span className="font-semibold">Received Date:</span> {data.receivedDate || "-"}
+            </p>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <p className="font-semibold uppercase tracking-wide text-slate-700 text-sm mb-2">
+            Bill Item Breakdown
+          </p>
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-slate-100 text-slate-700">
+                <th className="p-3 border border-slate-300">#</th>
+                <th className="p-3 border border-slate-300">Qty</th>
+                <th className="p-3 border border-slate-300">Rate</th>
+                <th className="p-3 border border-slate-300">Net Weight</th>
+                <th className="p-3 border border-slate-300 text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {itemRows.map((item) => (
+                <tr key={item.index} className="border-b border-slate-200">
+                  <td className="p-3 border border-slate-300">{item.index}</td>
+                  <td className="p-3 border border-slate-300">{item.qty}</td>
+                  <td className="p-3 border border-slate-300">{item.rate}</td>
+                  <td className="p-3 border border-slate-300">{item.netWeight || "-"}</td>
+                  <td className="p-3 border border-slate-300 text-right">{item.amount}</td>
+                </tr>
+              ))}
+              <tr className="bg-slate-50 font-semibold">
+                <td colSpan={4} className="p-3 border border-slate-300 text-right">
+                  Total Item Amount
+                </td>
+                <td className="p-3 border border-slate-300 text-right">
+                  {data.totalItemAmount.toFixed(2)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mb-6">
+          <p className="font-semibold uppercase tracking-wide text-slate-700 text-sm mb-2">
+            Quality Difference Adjustments
+          </p>
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-slate-100 text-slate-700">
+                <th className="p-3 border border-slate-300">#</th>
+                <th className="p-3 border border-slate-300">Qty</th>
+                <th className="p-3 border border-slate-300">UOM</th>
+                <th className="p-3 border border-slate-300">Rate</th>
+                <th className="p-3 border border-slate-300 text-right">Amount</th>
+                <th className="p-3 border border-slate-300">Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              {qualityRows.map((row) => (
+                <tr key={row.index} className="border-b border-slate-200">
+                  <td className="p-3 border border-slate-300">{row.index}</td>
+                  <td className="p-3 border border-slate-300">{row.qty}</td>
+                  <td className="p-3 border border-slate-300">{row.uom}</td>
+                  <td className="p-3 border border-slate-300">{row.rate}</td>
+                  <td className="p-3 border border-slate-300 text-right">{row.amount}</td>
+                  <td className="p-3 border border-slate-300">{row.remarks || "-"}</td>
+                </tr>
+              ))}
+              <tr className="bg-slate-50 font-semibold">
+                <td colSpan={4} className="p-3 border border-slate-300 text-right">
+                  Total Quality Adjustment
+                </td>
+                <td className="p-3 border border-slate-300 text-right">
+                  {data.totalQualityDiffAmount.toFixed(2)}
+                </td>
+                <td className="p-3 border border-slate-300" />
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
+          <div className="bg-slate-50 p-4 rounded space-y-2">
+            <p className="font-semibold text-slate-700">Deductions</p>
+            <div className="flex justify-between">
+              <span>Cash Discount ({data.cashDiscountAmount ? `${data.cashDiscountAmount.toFixed(2)}` : "0.00"})</span>
+              <span>{data.cashDiscountAmount.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Unloading</span>
+              <span>{parseFloat(data.unloading || 0).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Cash Paid</span>
+              <span>{parseFloat(data.cashPaid || 0).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Shortage</span>
+              <span>{parseFloat(data.shortage || 0).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Late Loading</span>
+              <span>{parseFloat(data.lateLoading || 0).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Rate Difference</span>
+              <span>{parseFloat(data.rateDiff || 0).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Other 1</span>
+              <span>{parseFloat(data.other1 || 0).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Other 2</span>
+              <span>{parseFloat(data.other2 || 0).toFixed(2)}</span>
+            </div>
+          </div>
+          <div className="bg-slate-50 p-4 rounded space-y-3">
+            <div className="flex justify-between text-sm">
+              <span>Total Deductions</span>
+              <span>{data.totalDeductions.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Additional Charges</span>
+              <span>{parseFloat(data.additionalCharges || 0).toFixed(2)}</span>
+            </div>
+            <div className="border-t pt-3">
+              <div className="flex justify-between text-base font-semibold">
+                <span>Net Amount Issued</span>
+                <span>{data.netAmountIssued.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {data.remarks ? (
+          <div className="bg-slate-50 p-4 rounded text-sm">
+            <p className="font-semibold text-slate-700 mb-2">Remarks</p>
+            <p>{data.remarks}</p>
+          </div>
+        ) : null}
+
+        <div className="mt-8 text-xs text-slate-500">
+          <p>Thank you for your business. Please verify all payment details before processing.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
