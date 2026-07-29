@@ -163,7 +163,7 @@ export default function PaymentAdviceForm() {
   // Define the print trigger
   const handlePrint = useReactToPrint({
     contentRef: contentRef,
-    documentTitle: `Payment_Advice_${formData.adviceNo || 'Draft'}`,
+    documentTitle: `Payment_Advice_${formData.adviceNo || "Draft"}`,
   });
 
   return (
@@ -753,53 +753,50 @@ export default function PaymentAdviceForm() {
           </div>
 
           {/* BOTTOM BUTTON BAR */}
-        </div>
+          <footer className="z-50 bg-slate-50 px-3 py-2 border-t border-slate-200 flex flex-wrap gap-3 justify-between items-center">
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-1.5 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition"
+            >
+              <RotateCcw className="w-4 h-4" /> Reset
+            </button>
 
-          <div className="hidden">
-             <div 
-          ref={contentRef}
-        >
-          <PrintableInvoice data={invoiceData} />
-        </div>
-          </div>
-       
-      </main>
-      <footer className="sticky bottom-0 z-50 bg-slate-50 px-6 py-4 border-t border-slate-200 flex flex-wrap gap-3 justify-between items-center">
-        <button
-          onClick={handleReset}
-          className="flex items-center gap-1.5 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-xs transition"
-        >
-          <RotateCcw className="w-4 h-4" /> Reset
-        </button>
-
-        <div className="flex flex-wrap gap-2">
-          {/* <button
+            <div className="flex flex-wrap gap-2">
+              {/* <button
                 onClick={handleExportExcel}
                 className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm shadow transition"
               >
                 <FileSpreadsheet className="w-4 h-4" /> Excel Export
               </button> */}
 
-          <button
-            onClick={() => handlePrint()}
-            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-xs shadow transition"
-          >
-            <Printer className="w-4 h-4" /> Print PDF
-          </button>
+              <button
+                onClick={() => handlePrint()}
+                className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-xs shadow transition"
+              >
+                <Printer className="w-4 h-4" /> Print PDF
+              </button>
 
-          <button className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg text-xs transition">
-            <Search className="w-4 h-4" /> Search
-          </button>
+              <button className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg text-xs transition">
+                <Search className="w-4 h-4" /> Search
+              </button>
 
-          <button className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs shadow transition">
-            <Trash2 className="w-4 h-4" /> Delete
-          </button>
+              <button className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs shadow transition">
+                <Trash2 className="w-4 h-4" /> Delete
+              </button>
 
-          <button className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs shadow transition">
-            <Save className="w-4 h-4" /> Save Record
-          </button>
+              <button className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs shadow transition">
+                <Save className="w-4 h-4" /> Save Record
+              </button>
+            </div>
+          </footer>
         </div>
-      </footer>
+
+        <div className="hidden">
+          <div ref={contentRef}>
+            <PrintableInvoice data={invoiceData} />
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
