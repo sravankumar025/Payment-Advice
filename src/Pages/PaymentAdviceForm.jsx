@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Printer,
   FileSpreadsheet,
@@ -12,8 +12,10 @@ import {
   Receipt,
 } from "lucide-react";
 import * as XLSX from "xlsx";
+import { useReactToPrint } from "react-to-print";
 import html2pdf from "html2pdf.js";
 import shalimarLogo from "../Images/shalimarLogo.png";
+import PrintableInvoice from "./PrintableInvoice";
 
 export default function PaymentAdviceForm() {
   // --- State Management ---
@@ -144,17 +146,25 @@ export default function PaymentAdviceForm() {
   };
 
   /**PDF Export */
-  const handleExportPDF = () => {
-    const element = document.getElementById("printable-area");
-    const opt = {
-      margin: 0.5,
-      filename: `Payment_Advice_${formData.adviceNo}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "letter", orientation: "landscape" },
-    };
-    html2pdf().set(opt).from(element).save();
+  const invoiceData = {
+    ...formData,
+    ...deductions,
+    items,
+    qualityDiffs,
+    totalItemAmount,
+    totalQualityDiffAmount,
+    cashDiscountAmount,
+    totalDeductions,
+    netAmountIssued,
   };
+
+  const contentRef = useRef(null);
+
+  // Define the print trigger
+  const handlePrint = useReactToPrint({
+    contentRef: contentRef,
+    documentTitle: `Payment_Advice_${formData.adviceNo || 'Draft'}`,
+  });
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 font-sans select-none">
@@ -164,7 +174,7 @@ export default function PaymentAdviceForm() {
             <img
               src={shalimarLogo}
               alt="Company Logo"
-              style={{ height: "50px", widht: "auto" }}
+              style={{ height: "50px", width: "auto" }}
             />
           </div>
         </div>
@@ -204,20 +214,18 @@ export default function PaymentAdviceForm() {
                   </label>
                   <input
                     list="location-list"
-                    className="w-full border border-slate-300 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500"
+                    className="w-full border border-slate-350 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-indigo-500"
                     placeholder="Type or select Location..."
-                     onChange={(e) =>
+                    onChange={(e) =>
                       setFormData({ ...formData, location: e.target.value })
                     }
                   />
-                  <datalist
-                    id="location-list"
-                    value={formData.location}
-                  >
+                  <datalist id="location-list" value={formData.location}>
                     <option value="Hyderabad" />
                     <option value="Chennai" />
                   </datalist>
                 </div>
+
                 <div className="w-64">
                   <label className="block text-xs font-medium text-slate-600 mb-1">
                     Party Name
@@ -230,10 +238,7 @@ export default function PaymentAdviceForm() {
                       setFormData({ ...formData, partyName: e.target.value })
                     }
                   />
-                  <datalist
-                    id="party-list"
-                    value={formData.partyName}
-                  >
+                  <datalist id="party-list" value={formData.partyName}>
                     <option value="Shalimar Roller Flour Mill" />
                     <option value="National Traders" />
                     <option value="Super Grain Suppliers" />
@@ -253,10 +258,7 @@ export default function PaymentAdviceForm() {
                       setFormData({ ...formData, broker: e.target.value })
                     }
                   />
-                  <datalist
-                    id="Broker-list"
-                    value={formData.broker}
-                  >
+                  <datalist id="Broker-list" value={formData.broker}>
                     <option value="Broker 1" />
                     <option value="Broker 2" />
                   </datalist>
@@ -408,13 +410,13 @@ export default function PaymentAdviceForm() {
                     type="text"
                     value={formData.bankName}
                     onChange={(e) =>
-                      setFormData({ ...formData, chqDate: e.target.value })
+                      setFormData({ ...formData, bankName: e.target.value })
                     }
                     className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                   />
                 </div>
 
-                 <div>
+                <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
                     Bank Code
                   </label>
@@ -715,16 +717,16 @@ export default function PaymentAdviceForm() {
 
                     <div className="flex justify-between items-center border-b border-indigo-800 pb-1">
                       <span className="text-indigo-200">Total Deductions:</span>
-                      <span className="font-bold text-rose-300">
+                      <span className="font-bold text-white">
                         ₹ {totalDeductions.toFixed(2)}
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center pt-2 text-sm">
-                      <span className="font-bold uppercase tracking-wider text-emerald-400">
+                      <span className="text-xs font-bold uppercase text-white">
                         Net Amount Issued:
                       </span>
-                      <span className="text-lg font-black text-emerald-400">
+                      <span className="text-xl font-black text-white font-mono">
                         ₹ {netAmountIssued.toFixed(2)}
                       </span>
                     </div>
@@ -752,6 +754,15 @@ export default function PaymentAdviceForm() {
 
           {/* BOTTOM BUTTON BAR */}
         </div>
+
+          <div className="hidden">
+             <div 
+          ref={contentRef}
+        >
+          <PrintableInvoice data={invoiceData} />
+        </div>
+          </div>
+       
       </main>
       <footer className="sticky bottom-0 z-50 bg-slate-50 px-6 py-4 border-t border-slate-200 flex flex-wrap gap-3 justify-between items-center">
         <button
@@ -770,7 +781,7 @@ export default function PaymentAdviceForm() {
               </button> */}
 
           <button
-            onClick={handleExportPDF}
+            onClick={() => handlePrint()}
             className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-xs shadow transition"
           >
             <Printer className="w-4 h-4" /> Print PDF
