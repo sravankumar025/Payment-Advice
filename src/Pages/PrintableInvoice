@@ -1,61 +1,425 @@
-const PrintableInvoice = ({ data }) => {
+import React from "react";
+
+export default function PrintableInvoice({ data = {} }) {
+  // Safe Array extractions
+  //   const items = Array.isArray(data.items) ? data.items : [];
+  //   const qualityDiffs = Array.isArray(data.qualityDiffs) ? data.qualityDiffs : [];
+
+  // Filter out rows that are purely zero/empty
+  const validItems = (Array.isArray(data.items) ? data.items : []).filter(
+    (item) => parseFloat(item.qty || 0) > 0 || parseFloat(item.rate || 0) > 0,
+  );
+
+  const validQualityDiffs = (
+    Array.isArray(data.qualityDiffs) ? data.qualityDiffs : []
+  ).filter(
+    (row) => parseFloat(row.qty || 0) > 0 || parseFloat(row.rate || 0) > 0,
+  );
+
+  const itemRows = validItems.map((item, index) => {
+    const qty = parseFloat(item.qty) || 0;
+    const rate = parseFloat(item.rate) || 0;
+    return {
+      ...item,
+      amount: (qty * rate).toFixed(2),
+      qty: item.qty || "0",
+      rate: item.rate || "0",
+      index: index + 1,
+    };
+  });
+
+  const qualityRows = validQualityDiffs.map((row, index) => {
+    const qty = parseFloat(row.qty) || 0;
+    const rate = parseFloat(row.rate) || 0;
+    return {
+      ...row,
+      amount: (qty * rate).toFixed(2),
+      qty: row.qty || "0",
+      rate: row.rate || "0",
+      index: index + 1,
+    };
+  });
+  // Safe numerical parsers
+  const totalItemAmount = parseFloat(data.totalItemAmount) || 0;
+  const totalQualityDiffAmount = parseFloat(data.totalQualityDiffAmount) || 0;
+  const totalDeductions = parseFloat(data.totalDeductions) || 0;
+  const netAmountIssued = parseFloat(data.netAmountIssued) || 0;
+  const cashDiscountAmount = parseFloat(data.cashDiscountAmount) || 0;
+  const unloading = parseFloat(data.unloading) || 0;
+  const CashPaid = parseFloat(data.cashPaid) || 0;
+  const shortage = parseFloat(data.shortage) || 0;
+  const lateLoading = parseFloat(data.lateLoading) || 0;
+  const rateDiff = parseFloat(data.rateDiff) || 0;
+  const other1 = parseFloat(data.other1) || 0;
+  const other2 = parseFloat(data.other2) || 0;
+
   return (
-    <div className="p-8 max-w-4xl mx-auto bg-white text-black font-sans">
-      {/* 1. Document Header */}
-      <div className="flex justify-between items-center border-b pb-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold uppercase tracking-wide">Payment Advice</h1>
-          <p className="text-sm text-gray-500">Shalimar Roller Flour Mill</p>
-        </div>
-        <div className="text-right text-sm">
-          <p><strong>Date:</strong> {data.date}</p>
-          <p><strong>Ref No:</strong> {data.refNo}</p>
-        </div>
-      </div>
+    <>
+      {/* Dynamic CSS styles optimized for multi-page PDF generation */}
+      <style>{`
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 5mm; /* Tight print margin */
+    }
+    html, body {
+      height: 100%;
+      overflow: hidden !important;
+      background-color: white !important;
+    }
+    .print-single-page {
+      width: 100% !important;
+      max-height: 100vh !important;
+      transform: scale(0.88); /* Scales all content down by 12% to guarantee 1 page */
+      transform-origin: top center;
+    }
+      table th, table td {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+`}</style>
 
-      {/* 2. Customer / Transaction Details Grid */}
-      <div className="grid grid-cols-2 gap-4 text-sm mb-6 bg-slate-50 p-4 rounded">
-        <div>
-          <p><strong>Party Name:</strong> {data.partyName}</p>
-          <p><strong>Location:</strong> {data.location}</p>
-        </div>
-        <div>
-          <p><strong>A/c No:</strong> {data.accountNo}</p>
-          <p><strong>Broker:</strong> {data.broker}</p>
-        </div>
-      </div>
+      <div className="bg-white text-black font-sans w-full p-2">
+        <div className="border border-slate-300 p-6 rounded-lg">
+          {/* HEADER SECTION */}
+          <div className="flex justify-between items-start mb-6 pb-4 border-b border-slate-200">
+            <div>
+              <h1 className="text-2xl font-bold uppercase tracking-wide text-slate-800">
+                PAYMENT ADVICE
+              </h1>
+              <p className="text-sm font-semibold text-slate-600 mt-1">
+                Shalimar Roller Flour Mill
+              </p>
+              <p className="text-xs text-slate-500">
+                Official Payment Audit Document
+              </p>
+            </div>
+            <div className="text-right text-xs space-y-1">
+              <div>
+                <span className="font-semibold text-slate-700">
+                  Advice No:{" "}
+                </span>
+                <span className="font-mono">{data.adviceNo || "-"}</span>
+              </div>
+              <div>
+                <span className="font-semibold text-slate-700">Date: </span>
+                <span>{data.date || "-"}</span>
+              </div>
+              <div>
+                <span className="font-semibold text-slate-700">Ref No: </span>
+                <span>{data.refNo || "-"}</span>
+              </div>
+            </div>
+          </div>
 
-      {/* 3. Items Table */}
-      <table className="w-full text-left text-sm border-collapse mb-6">
-        <thead>
-          <tr className="border-b bg-gray-100">
-            <th className="py-2 px-3">#</th>
-            <th className="py-2 px-3">Qty</th>
-            <th className="py-2 px-3">Rate</th>
-            <th className="py-2 px-3 text-right">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.items.map((item, index) => (
-            <tr key={index} className="border-b">
-              <td className="py-2 px-3">{index + 1}</td>
-              <td className="py-2 px-3">{item.qty}</td>
-              <td className="py-2 px-3">{item.rate}</td>
-              <td className="py-2 px-3 text-right">{item.amount}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+          {/* PARTY & PAYMENT DETAILS GRID */}
+          <div className="grid grid-cols-2 gap-4 mb-6 text-xs avoid-page-break">
+            <div className="space-y-1.5 bg-slate-50 p-3.5 rounded border border-slate-200">
+              <p className="font-bold text-slate-800 border-b pb-1 mb-2">
+                Customer Details
+              </p>
+              <p>
+                <span className="font-semibold">Party:</span>{" "}
+                {data.partyName || "-"}
+              </p>
+              <p>
+                <span className="font-semibold">Location:</span>{" "}
+                {data.location || "-"}
+              </p>
+              <p>
+                <span className="font-semibold">Account No.:</span>{" "}
+                {data.accountNo || "-"}
+              </p>
+              <p>
+                <span className="font-semibold">Broker:</span>{" "}
+                {data.broker || "-"}
+              </p>
+              <p>
+                <span className="font-semibold">Outstanding Bill:</span>{" "}
+                {data.outstandingBillNo || "-"}
+              </p>
+            </div>
 
-      {/* 4. Totals & Deductions */}
-      <div className="flex justify-end text-sm">
-        <div className="w-1/2 space-y-2 border-t pt-2">
-          <div className="flex justify-between font-semibold">
-            <span>Total Amount:</span>
-            <span>{data.totalAmount}</span>
+            <div className="space-y-1.5 bg-slate-50 p-3.5 rounded border border-slate-200">
+              <p className="font-bold text-slate-800 border-b pb-1 mb-2">
+                Payment Details
+              </p>
+              <p>
+                <span className="font-semibold">Mode:</span>{" "}
+                {data.paymentMode || "-"}
+              </p>
+              <p>
+                <span className="font-semibold">Chq/DD No.:</span>{" "}
+                {data.chqNo || "-"}
+              </p>
+              <p>
+                <span className="font-semibold">Chq/DD Date:</span>{" "}
+                {data.chqDate || "-"}
+              </p>
+              <p>
+                <span className="font-semibold">Bank Name:</span>{" "}
+                {data.bankName || "-"}
+              </p>
+              <p>
+                <span className="font-semibold">Bank Code:</span>{" "}
+                {data.bankCode || "-"}
+              </p>
+              <p>
+                <span className="font-semibold">Received Date:</span>{" "}
+                {data.receivedDate || "-"}
+              </p>
+            </div>
+          </div>
+
+          {/* TABLE 1: BILL ITEM BREAKDOWN */}
+          <div className="mb-6 avoid-page-break">
+            <p className="font-bold uppercase tracking-wide text-slate-700 text-xs mb-2">
+              Bill Item Breakdown
+            </p>
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100 text-slate-700 text-left">
+                  <th className="p-2 border border-slate-300 w-8 text-center">
+                    #
+                  </th>
+                  <th className="p-2 border border-slate-300">Qty</th>
+                  <th className="p-2 border border-slate-300">Rate</th>
+                  <th className="p-2 border border-slate-300">Net Weight</th>
+                  <th className="p-2 border border-slate-300 text-right">
+                    Amount
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {itemRows.length > 0 ? (
+                  itemRows.map((item) => (
+                    <tr key={item.index} className="border-b border-slate-200">
+                      <td className="p-2 border border-slate-300 text-center">
+                        {item.index}
+                      </td>
+                      <td className="p-2 border border-slate-300">
+                        {item.qty}
+                      </td>
+                      <td className="p-2 border border-slate-300">
+                        {item.rate}
+                      </td>
+                      <td className="p-2 border border-slate-300">
+                        {item.netWeight || "-"}
+                      </td>
+                      <td className="p-2 border border-slate-300 text-right">
+                        {item.amount}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="p-2 border border-slate-300 text-center text-slate-400"
+                    >
+                      No bill items listed
+                    </td>
+                  </tr>
+                )}
+                <tr className="bg-slate-50 font-bold">
+                  <td
+                    colSpan={4}
+                    className="p-2 border border-slate-300 text-right"
+                  >
+                    Total Item Amount
+                  </td>
+                  <td className="p-2 border border-slate-300 text-right">
+                    {totalItemAmount.toFixed(2)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* TABLE 2: QUALITY ADJUSTMENTS */}
+          <div className="mb-6 avoid-page-break">
+            <p className="font-bold uppercase tracking-wide text-slate-700 text-xs mb-2">
+              Quality Difference Adjustments
+            </p>
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-100 text-slate-700 text-left">
+                  <th className="p-2 border border-slate-300 w-8 text-center">
+                    #
+                  </th>
+                  <th className="p-2 border border-slate-300">Qty</th>
+                  <th className="p-2 border border-slate-300">UOM</th>
+                  <th className="p-2 border border-slate-300">Rate</th>
+                  <th className="p-2 border border-slate-300 text-right">
+                    Amount
+                  </th>
+                  <th className="p-2 border border-slate-300">Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                {qualityRows.length > 0 ? (
+                  qualityRows.map((row) => (
+                    <tr key={row.index} className="border-b border-slate-200">
+                      <td className="p-2 border border-slate-300 text-center">
+                        {row.index}
+                      </td>
+                      <td className="p-2 border border-slate-300">{row.qty}</td>
+                      <td className="p-2 border border-slate-300">
+                        {row.uom || "-"}
+                      </td>
+                      <td className="p-2 border border-slate-300">
+                        {row.rate}
+                      </td>
+                      <td className="p-2 border border-slate-300 text-right">
+                        {row.amount}
+                      </td>
+                      <td className="p-2 border border-slate-300">
+                        {row.remarks || "-"}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="p-2 border border-slate-300 text-center text-slate-400"
+                    >
+                      No quality adjustments recorded
+                    </td>
+                  </tr>
+                )}
+                <tr className="bg-slate-50 font-bold">
+                  <td
+                    colSpan={4}
+                    className="p-2 border border-slate-300 text-right"
+                  >
+                    Total Quality Adjustment
+                  </td>
+                  <td className="p-2 border border-slate-300 text-right">
+                    {totalQualityDiffAmount.toFixed(2)}
+                  </td>
+                  <td className="p-2 border border-slate-300" />
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* DEDUCTIONS & NET SUMMARY */}
+          <div className="grid grid-cols-2 gap-4 mb-6 text-xs avoid-page-break">
+            <div className="bg-slate-50 p-3.5 rounded border border-slate-200 space-y-1.5">
+              <p className="font-bold text-slate-800 border-b pb-1 mb-2">
+                Deductions
+              </p>
+              <div className="flex justify-between">
+                {cashDiscountAmount > 0 && (
+                  <>
+                    <span>Cash Discount</span>
+                    <span>{cashDiscountAmount.toFixed(2)}</span>
+                  </>
+                )}
+              </div>
+              <div className="flex justify-between">
+                {unloading > 0 && (
+                  <>
+                    <span>Unloading</span>
+                    <span>{parseFloat(data.unloading || 0).toFixed(2)}</span>
+                  </>
+                )}
+              </div>
+              <div className="flex justify-between">
+                {CashPaid > 0 && (
+                  <>
+                    <span>Cash Paid</span>
+                    <span>{parseFloat(data.cashPaid || 0).toFixed(2)}</span>
+                  </>
+                )}
+              </div>
+              <div className="flex justify-between">
+                {shortage > 0 && (
+                  <>
+                    <span>Shortage</span>
+                    <span>{parseFloat(data.shortage || 0).toFixed(2)}</span>
+                  </>
+                )}
+              </div>
+              <div className="flex justify-between">
+                {lateLoading > 0 && (
+                  <>
+                    <span>Late Loading</span>
+                    <span>{parseFloat(data.lateLoading || 0).toFixed(2)}</span>
+                  </>
+                )}
+              </div>
+              <div className="flex justify-between">
+                {rateDiff > 0 && (
+                  <>
+                    <span>Rate Difference</span>
+                    <span>{parseFloat(data.rateDiff || 0).toFixed(2)}</span>
+                  </>
+                )}
+              </div>
+              <div className="flex justify-between">
+                {other1 > 0 && (
+                  <>
+                    <span>Other 1</span>
+                    <span>{parseFloat(data.other1 || 0).toFixed(2)}</span>
+                  </>
+                )}
+              </div>
+              <div className="flex justify-between">
+                {other2 > 0 && (
+                  <>
+                    <span>Other 2</span>
+                    <span>{parseFloat(data.other2 || 0).toFixed(2)}</span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-3.5 rounded border border-slate-200 flex flex-col justify-between">
+              <div className="space-y-2">
+                <p className="font-bold text-slate-800 border-b pb-1 mb-2">
+                  Summary
+                </p>
+                <div className="flex justify-between font-medium">
+                  <span>Total Deductions</span>
+                  <span>{totalDeductions.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between font-medium">
+                  <span>Additional Charges</span>
+                  <span>
+                    {parseFloat(data.additionalCharges || 0).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+              <div className="border-t border-slate-300 pt-3 mt-4">
+                <div className="flex justify-between text-sm font-bold text-slate-900">
+                  <span>Net Amount Issued</span>
+                  <span>₹ {netAmountIssued.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* REMARKS */}
+          {data.remarks && (
+            <div className="bg-slate-50 p-3.5 rounded border border-slate-200 text-xs mb-6 avoid-page-break">
+              <p className="font-bold text-slate-800 mb-1">Remarks</p>
+              <p className="text-slate-600">{data.remarks}</p>
+            </div>
+          )}
+
+          {/* FOOTER */}
+          <div className="mt-8 pt-4 border-t border-slate-200 text-xs text-slate-500 text-center avoid-page-break">
+            <p>
+              Thank you for your business. Please verify all payment details
+              before processing.
+            </p>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
-};
+}
