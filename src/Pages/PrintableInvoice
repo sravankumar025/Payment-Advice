@@ -1,6 +1,8 @@
 import React from "react";
+import { useReactToPrint } from "react-to-print";
 
-export default function PrintableInvoice({ data = {} }) {
+ const PrintableInvoice=React.forwardRef(({ data = {} },ref) =>{
+
   // Safe Array extractions
   //   const items = Array.isArray(data.items) ? data.items : [];
   //   const qualityDiffs = Array.isArray(data.qualityDiffs) ? data.qualityDiffs : [];
@@ -54,7 +56,7 @@ export default function PrintableInvoice({ data = {} }) {
   const other2 = parseFloat(data.other2) || 0;
 
   return (
-    <>
+    <div ref={ref} className="pdf-layout">
       {/* Dynamic CSS styles optimized for multi-page PDF generation */}
       <style>{`
   @media print {
@@ -420,6 +422,8 @@ export default function PrintableInvoice({ data = {} }) {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
-}
+ });
+
+export default PrintableInvoice;
