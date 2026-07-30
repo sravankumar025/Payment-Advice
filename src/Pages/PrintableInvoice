@@ -56,37 +56,21 @@ import { useReactToPrint } from "react-to-print";
   const other2 = parseFloat(data.other2) || 0;
 
   return (
-    <div ref={ref} className="pdf-layout">
+    <div style={{ 
+      maxHeight: "297mm", 
+      height: "297mm", 
+      width: "210mm", 
+      overflow: "hidden",
+      boxSizing: "border-box" 
+    }} 
+    className="bg-white text-black font-sans mx-auto origin-top scale-95">
+          <div ref={ref} className="pdf-layout print-single-page">
       {/* Dynamic CSS styles optimized for multi-page PDF generation */}
-      <style>{`
-  @media print {
-    @page {
-      size: A4 portrait;
-      margin: 5mm; /* Tight print margin */
-    }
-    html, body {
-      height: 100%;
-      overflow: hidden !important;
-      background-color: white !important;
-    }
-    .print-single-page {
-      width: 100% !important;
-      max-height: 100vh !important;
-      transform: scale(0.88); /* Scales all content down by 12% to guarantee 1 page */
-      transform-origin: top center;
-    }
-      table th, table td {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-`}</style>
 
-      <div className="bg-white text-black font-sans w-full p-2">
-        <div className="border border-slate-300 p-6 rounded-lg">
+      <div className="bg-white text-black font-sans w-full p-1">
+        <div className="border border-slate-300 p-4 rounded-lg">
           {/* HEADER SECTION */}
-          <div className="flex justify-between items-start mb-6 pb-4 border-b border-slate-200">
+          <div className="flex justify-between items-start mb-3 pb-2 border-b border-slate-200">
             <div>
               <h1 className="text-2xl font-bold uppercase tracking-wide text-slate-800">
                 PAYMENT ADVICE
@@ -117,7 +101,7 @@ import { useReactToPrint } from "react-to-print";
           </div>
 
           {/* PARTY & PAYMENT DETAILS GRID */}
-          <div className="grid grid-cols-2 gap-4 mb-6 text-xs avoid-page-break">
+          <div className="grid grid-cols-2 gap-4 mb-2 text-xs avoid-page-break">
             <div className="space-y-1.5 bg-slate-50 p-3.5 rounded border border-slate-200">
               <p className="font-bold text-slate-800 border-b pb-1 mb-2">
                 Customer Details
@@ -176,7 +160,7 @@ import { useReactToPrint } from "react-to-print";
           </div>
 
           {/* TABLE 1: BILL ITEM BREAKDOWN */}
-          <div className="mb-6 avoid-page-break">
+          <div className="mb-2 avoid-page-break">
             <p className="font-bold uppercase tracking-wide text-slate-700 text-xs mb-2">
               Bill Item Breakdown
             </p>
@@ -198,19 +182,19 @@ import { useReactToPrint } from "react-to-print";
                 {itemRows.length > 0 ? (
                   itemRows.map((item) => (
                     <tr key={item.index} className="border-b border-slate-200">
-                      <td className="p-2 border border-slate-300 text-center">
+                      <td className="p-1 border border-slate-300 text-center">
                         {item.index}
                       </td>
-                      <td className="p-2 border border-slate-300">
+                      <td className="p-1 border border-slate-300">
                         {item.qty}
                       </td>
-                      <td className="p-2 border border-slate-300">
+                      <td className="p-1 border border-slate-300">
                         {item.rate}
                       </td>
-                      <td className="p-2 border border-slate-300">
+                      <td className="p-1 border border-slate-300">
                         {item.netWeight || "-"}
                       </td>
-                      <td className="p-2 border border-slate-300 text-right">
+                      <td className="p-1 border border-slate-300 text-right">
                         {item.amount}
                       </td>
                     </tr>
@@ -241,7 +225,7 @@ import { useReactToPrint } from "react-to-print";
           </div>
 
           {/* TABLE 2: QUALITY ADJUSTMENTS */}
-          <div className="mb-6 avoid-page-break">
+          <div className="mb-2 avoid-page-break">
             <p className="font-bold uppercase tracking-wide text-slate-700 text-xs mb-2">
               Quality Difference Adjustments
             </p>
@@ -264,20 +248,20 @@ import { useReactToPrint } from "react-to-print";
                 {qualityRows.length > 0 ? (
                   qualityRows.map((row) => (
                     <tr key={row.index} className="border-b border-slate-200">
-                      <td className="p-2 border border-slate-300 text-center">
+                      <td className="p-1 border border-slate-300 text-center">
                         {row.index}
                       </td>
-                      <td className="p-2 border border-slate-300">{row.qty}</td>
-                      <td className="p-2 border border-slate-300">
+                      <td className="p-1 border border-slate-300">{row.qty}</td>
+                      <td className="p-1 border border-slate-300">
                         {row.uom || "-"}
                       </td>
-                      <td className="p-2 border border-slate-300">
+                      <td className="p-1 border border-slate-300">
                         {row.rate}
                       </td>
-                      <td className="p-2 border border-slate-300 text-right">
+                      <td className="p-1 border border-slate-300 text-right">
                         {row.amount}
                       </td>
-                      <td className="p-2 border border-slate-300">
+                      <td className="p-1 border border-slate-300">
                         {row.remarks || "-"}
                       </td>
                     </tr>
@@ -309,7 +293,7 @@ import { useReactToPrint } from "react-to-print";
           </div>
 
           {/* DEDUCTIONS & NET SUMMARY */}
-          <div className="grid grid-cols-2 gap-4 mb-6 text-xs avoid-page-break">
+          <div className="grid grid-cols-2 gap-4 mb-2 text-xs avoid-page-break">
             <div className="bg-slate-50 p-3.5 rounded border border-slate-200 space-y-1.5">
               <p className="font-bold text-slate-800 border-b pb-1 mb-2">
                 Deductions
@@ -407,14 +391,14 @@ import { useReactToPrint } from "react-to-print";
 
           {/* REMARKS */}
           {data.remarks && (
-            <div className="bg-slate-50 p-3.5 rounded border border-slate-200 text-xs mb-6 avoid-page-break">
+            <div className="bg-slate-50 p-3.5 rounded border border-slate-200 text-xs mb-2 avoid-page-break">
               <p className="font-bold text-slate-800 mb-1">Remarks</p>
               <p className="text-slate-600">{data.remarks}</p>
             </div>
           )}
 
           {/* FOOTER */}
-          <div className="mt-8 pt-4 border-t border-slate-200 text-xs text-slate-500 text-center avoid-page-break">
+          <div className="mt-3 pt-2 border-t border-slate-200 text-xs text-slate-500 text-center avoid-page-break">
             <p>
               Thank you for your business. Please verify all payment details
               before processing.
@@ -423,6 +407,8 @@ import { useReactToPrint } from "react-to-print";
         </div>
       </div>
     </div>
+    </div>
+
   );
  });
 
