@@ -16,11 +16,13 @@ import { useReactToPrint } from "react-to-print";
 import html2pdf from "html2pdf.js";
 import shalimarLogo from "../Images/shalimarLogo.png";
 import PrintableInvoice from "./PrintableInvoice";
+import toast, { Toaster } from "react-hot-toast";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export default function PaymentAdviceForm() {
   // --- State Management ---
   const [currentTime, setCurrentTime] = useState(new Date());
-
   // Header & Transaction Info
   const [formData, setFormData] = useState({
     location: "",
@@ -160,27 +162,43 @@ export default function PaymentAdviceForm() {
 
   const contentRef = useRef(null);
 
-  // Define the print trigger
-  const handlePrint = useReactToPrint({
-    contentRef: contentRef,
-    documentTitle: `Payment_Advice_${formData.adviceNo || "Draft"}`,
-  });
+  const handleDownloadPdf = async () => {
+    
+    const element = document.getElementById("invoice"); 
+    if (!element) {
+      console.error("Invoice element not found");
+      return;
+    }
+
+    const canvas = await html2canvas(element, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+
+    // Create PDF
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save("Payment_Advice_Custom.pdf");
+
+    
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 font-sans select-none">
-      <header className="sticky top-0 z-50 w-full bg-white px-6 py-2 flex flex-col md:flex-row justify-between items-center shadow-md border-b border-slate-800">
+      <header className="sticky top-0 z-50 w-full bg-white px-4 py-2 flex flex-col md:flex-row justify-between items-center shadow-md border-b border-slate-800">
         <div className="flex items-center space-x-3">
           <div>
             <img
               src={shalimarLogo}
               alt="Company Logo"
-              style={{ height: "50px", width: "auto" }}
+              style={{ height: "40px", width: "auto" }}
             />
           </div>
         </div>
 
         <div className="text-center">
-          <p className="text-xl text-black font-medium">
+          <p className="text-xm text-black font-medium">
             Payment Advice Manager
           </p>
         </div>
@@ -208,7 +226,7 @@ export default function PaymentAdviceForm() {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="w-64">
+                <div className="w-74">
                   <label className="block text-xs font-medium text-slate-600 mb-1">
                     Location
                   </label>
@@ -226,7 +244,7 @@ export default function PaymentAdviceForm() {
                   </datalist>
                 </div>
 
-                <div className="w-64">
+                <div className="w-74">
                   <label className="block text-xs font-medium text-slate-600 mb-1">
                     Party Name
                   </label>
@@ -246,7 +264,7 @@ export default function PaymentAdviceForm() {
                   </datalist>
                 </div>
 
-                <div className="w-64">
+                <div className="w-74">
                   <label className="block text-xs font-medium text-slate-600 mb-1">
                     Broker Name
                   </label>
@@ -770,10 +788,11 @@ export default function PaymentAdviceForm() {
               </button> */}
 
               <button
-                onClick={() => handlePrint()}
+                onClick={handleDownloadPdf}
                 className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-xs shadow transition"
               >
                 <Printer className="w-4 h-4" /> Print PDF
+                <Toaster position="top-right" />
               </button>
 
               <button className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg text-xs transition">
@@ -791,7 +810,12 @@ export default function PaymentAdviceForm() {
           </footer>
         </div>
 
-        <div className="hidden">
+        <div id="invoice" style={{
+          position: "absolute",
+          top: "-9999px",
+          left: "-9999px",
+          visibility: "visible"
+        }}>
           <div ref={contentRef}>
             <PrintableInvoice data={invoiceData} />
           </div>
