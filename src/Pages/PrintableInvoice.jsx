@@ -1,6 +1,5 @@
 import React from "react";
-import { useReactToPrint } from "react-to-print";
-import shalimarLogo from "../Images/shalimarLogo.png";
+import shalimarLogo from "../Images/shalimarLogo.png"; // Import the logo image
 
 const SAMPLE_DATA = {
   adviceNo: "592",
@@ -41,89 +40,129 @@ const SAMPLE_DATA = {
   brokerName: "KALYANJI"
 };
 
-const PrintableInvoice = React.forwardRef(({ data }, ref) => {
-  const advice = { ...SAMPLE_DATA };
+// Helper style to force html2canvas / html2pdf to render underlines strictly below text baselines
+const underlineStyle = {
+  display: "inline-block",
+  verticalAlign: "bottom",
+  lineHeight: "1.2",
+  paddingBottom: "2px",
+  borderBottom: "1.5px solid #000000"
+};
+
+const PrintableInvoice = React.forwardRef(({ data = {} }, ref) => {
+  // Merge default sample data with props
+  const advice = { ...SAMPLE_DATA, ...data };
 
   return (
-    <div>
-      
-        {/* Outer A4 Page Container */}
-        <div
-          ref={ref}
-          style={{ width: "210mm", height: "297mm", margin:"0 auto", boxSizing:"border-box"}}
-          className="bg-white text font-sans  shadow-lg border border-black relative box-sizing flex flex-col justify-between origin-top"
-        >
-          <div className="border-2 border-black p-3 h-full flex flex-col justify-between text-[11px] leading-snug">
+    <div style={{ padding: "0", margin: "0" }}>
+      {/* Outer A4 Page Container */}
+      <div
+        ref={ref}
+        style={{
+          width: "210mm",
+          height: "297mm",
+          margin: "0 auto",
+          boxSizing: "border-box",
+          backgroundColor: "#ffffff",
+          color: "#000000"
+        }}
+        className="text font-sans relative flex flex-col justify-between bg-white text-black p-4"
+      >
+        {/* Document Frame Border */}
+        <div className="border-2 border-black p-3 h-full flex flex-col justify-between text-[11px] leading-snug box-border">
+          
+          {/* Upper Content Box */}
+          <div>
+            {}
+            <div className="relative mb-3 pb-2 border-b border-black min-h-[75px]">
+              {/* Advice Number Badge */}
+              <div className="text-xs">
+                No. {advice.adviceNo}
+              </div>
 
-            <div>
-              { }
-              <div className="relative mb-4">
-                <div className="absolute bg-black text-white px-4 py-2 rounded-br-2xl rounded-tl-md font-bold text-sm shadow-sm">
-                  No. {advice.adviceNo}
-                </div>
-
-                {/* Center Company Branding */}
-                <div className="text-center pt-1">
-                  <div className="inline-flex items-center gap-3">
+              {/* Center Company Branding */}
+              <div className="text-center">
+               
+                <div className="inline-flex items-center gap-2">
                     <div className="text-left">
-                      <p className="text-[11px] font-bold tracking-widest text-[#002D62] uppercase py-2">PAYMENT ADVICE</p>
+                      <p className="text-[10px] font-bold tracking-widest text-black uppercase py-2">PAYMENT ADVICE</p>
                       <img src={shalimarLogo} height="65px" width="150px" alt="Company Logo" />
                     </div>
                   </div>
-                  <p className="text-[9.5px] font-bold text-slate-700 mt-1 pb-1 border-b border-slate-300">
-                    15-1-503/A/9, ASHOK MARKET, SIDDIAMBER BAZAR, HYDERABAD - 12. [A.P]
-                  </p>
-                </div>
+                
 
-                {/* Right Side Contact Info */}
-                <div className="absolute top-0 right-0 text-[10px] text-black space-y-0.5 font-medium text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" /></svg>
-                    <span>Phone: 24741736</span>
-                  </div>
-                  <p>24745058</p>
-                  <p>24614929</p>
-                  <div className="flex items-center justify-end gap-1 mt-1">
-                    <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M19 8B1 1 0 0 0 19 6H5B1 1 0 0 0 5 8V16B1 1 0 0 0 5 18H19B1 1 0 0 0 19 16V8M19 18H5V10L12 14.5L19 10V18M12 12.5L5 8H19L12 12.5Z" /></svg>
-                    <span>Fax: 91-40-24605536</span>
-                  </div>
-                  <div className="flex items-center justify-end gap-1">
-                    <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" /></svg>
-                    <span>Email: shalimar_srfm@rediffmail.com</span>
-                  </div>
+                <p className="text-[9.5px] font-bold text-slate-800 mt-1">
+                  15-1-503/A/9, ASHOK MARKET, SIDDIAMBER BAZAR, HYDERABAD - 12. [A.P.]
+                </p>
+              </div>
+
+              {/* Right Side Contact Info */}
+              <div className="absolute top-0 right-0 text-[9.5px] text-black space-y-0.5 font-medium text-right leading-tight">
+                <div className="flex items-center justify-end gap-1">
+                  <span>Phone: 24741736</span>
+                </div>
+                <p className="pr-0.5">24745058</p>
+                <p className="pr-0.5">24614929</p>
+                <div className="flex items-center justify-end gap-1 mt-0.5">
+                  <span>Fax: 91-40-24605536</span>
+                </div>
+                <div className="flex items-center justify-end gap-1">
+                  <span>Email: shalimar_srfm@rediffmail.com</span>
                 </div>
               </div>
+            </div>
 
-              { }
-              <div className="flex justify-between font-bold text-[13px] mb-1">
-                <div>Ref. No. {advice.refNo}</div>
-                <div>Date : {advice.date}</div>
+            {}
+            <div className="flex justify-between font-bold text-[12px] mb-2 px-0.5">
+              <div>
+                Ref. No. <span className="font-black ml-1">{advice.refNo}</span>
               </div>
+              <div>
+                Date : <span className="font-black ml-1">{advice.date}</span>
+              </div>
+            </div>
 
-              <div className="mb-2">
-                <p className="font-bold text-[13px]">To,</p>
-                <div className="flex items-start gap-2 pl-2 mt-0.5">
-                  {/**Party icon should come here */}
-                  <div>
-                    <p className="font-bold text-[13px] text-slate-900">
-                      Party's Name & Address :</p>
+            {}
+            <div className="mb-2.5">
+              <p className="font-bold text-[12px] mb-1">To,</p>
+              <div className="flex items-start gap-2 pl-2">
+                <div className="font-bold text-[12px] text-black whitespace-nowrap pt-0.5">
+                  Party's Name & Address :
+                </div>
+
+                <div className="flex flex-col gap-1 flex-1 max-w-md">
+                  {/* Party Name Underlined Line */}
+                  <div style={{ ...underlineStyle, width: "100%", minHeight: "18px" }}>
+                    <span className="uppercase text-[12px] font-extrabold text-black block">
+                      {advice.partyName || "\u00A0"}
+                    </span>
                   </div>
-                  <div className="flex flex-col">
-                    <p className="uppercase text-[12px] inline-block border-b border-slate-500 w-48">{advice.partyName}</p>
-                    <p className="font-bold text-[12px] pl-29 uppercase text-slate-800 inline-block border-b border-slate-500 w-48">{advice.partyLocation}</p>
+
+                  {/* Party Location Underlined Line */}
+                  <div style={{ ...underlineStyle, width: "100%", minHeight: "18px" }}>
+                    <span className="uppercase text-[12px] font-extrabold text-black block">
+                      {advice.partyLocation || "\u00A0"}
+                    </span>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Sub & Received Box */}
-              <div className="border border-black rounded-md p-1.5 flex justify-between items-center font-bold text-[12.5px] mb-2">
-                <div>Sub: Your outstanding Bill No. <span className="ml-4 font-extrabold">{advice.billNo}</span></div>
-                <div>Received on dated <span className="ml-4 font-extrabold">{advice.receivedDate}</span></div>
+            {}
+            <div className="border border-black rounded-md p-1.5 flex justify-between items-center font-bold text-[12px] mb-2.5 bg-slate-50">
+              <div>
+                Sub: Your outstanding Bill No.{" "}
+                <span className="ml-3 font-extrabold text-black">{advice.billNo}</span>
               </div>
+              <div>
+                Received on dated{" "}
+                <span className="ml-3 font-extrabold text-black">{advice.receivedDate}</span>
+              </div>
+            </div>
 
-              {/* Covering Letter Box */}
-              <div className="border border-dashed border-black rounded-md p-2 mb-2 text-[13px] leading-relaxed">
-                <p className="font-bold mb-1">Dear Sir,</p>
+            {}
+            <div className="border border-dashed border-black rounded-md p-2.5 mb-2.5 text-[12px] leading-relaxed bg-white">
+               <p className="font-bold mb-1">Dear Sir,</p>
                 <div className="pl-4 space-y-1">
                   <p>
                     Please find enclosed here with RTGS No. <span className="inline-block border-b border-slate-400 w-48 text-center font-semibold">{advice.rtgsNo}</span> Dated <span className="inline-block font-semibold px-2">{advice.rtgsDate}</span>
@@ -131,10 +170,10 @@ const PrintableInvoice = React.forwardRef(({ data }, ref) => {
                     for Rs. <span className="inline-block font-bold text-slate-900 px-2">{advice.amountRs}</span> towards. full and final/part payment as per the details as under.
                   </p>
                 </div>
-              </div>
+            </div>
 
-              { }
-              <div className="grid grid-cols-12 gap-2 mb-2">
+            {}
+           <div className="grid grid-cols-12 gap-2 mb-2">
                 {/* Left Column: Deductions Breakdown */}
                 <div className="col-span-5 border border-black p-2 flex flex-col justify-between text-[13px]">
                   <div className="space-y-1">
@@ -253,75 +292,73 @@ const PrintableInvoice = React.forwardRef(({ data }, ref) => {
                 </div>
               </div>
 
-              { }
-              <div className="flex items-center gap-2 mb-2 font-bold text-[14px] text-black">
-                <div className="bg-[#002D62] text-white rounded-full p-1">
-                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" /></svg>
-                </div>
-                <span>Please Credit the same to our A/c. and acknowledge the receipt at your earliest,</span>
-              </div>
-
-              <div className="border border-dashed border-black rounded-md p-2 text-[12px] text leading-tight mb-1">
-                The Payment for your above bill(s) is being made with the clear understanding that you have purchased the wheat from your local & delivered to us against the bargain on our Mill delivery basis & that all taxes / levies as applicable in your state will be paid by you. We are in no way responsible for any taxes or levies. Your acceptance of the DD wii confirm your acceptance of these facts.
-              </div>
+            {}
+            <div className="flex items-center gap-2 mb-2 font-bold text-[12px] text-black">
+              <span>Please Credit the same to our A/c. and acknowledge the receipt at your earliest,</span>
             </div>
 
-            { }
-            <div>
-              <div className="grid grid-cols-12 gap-4 items-end pt-1">
-                {/* Left Side: Terms and Conditions */}
-                <div className="col-span-10 space-y-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="bg-[#002D62] text-white rounded-full p-1">
-                      <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
-                    </div>
-                    <span className=" text-black font-bold text-[12px] px-2 py-1 rounded uppercase tracking-wider">
-                      TERMS AND CONDITIONS:
-                    </span>
-                  </div>
-
-                  <ol className="list-decimal pl-4 text-[10.5px] text-slate-800 space-y-1.5 font-medium">
-                    <li>Subject to Hyderabad Jurisdiction.</li>
-                    <li>Payments are made through account payee demand drafts only. Cash will not be paid in any circumstances.</li>
-                    <li>If there is undue delay (more than 60 days) in payment kindly confirm the balance with us.</li>
-                  </ol>
-
-                  <p className="text-[10px] font-bold text-slate-900 pt-1">Encl. as above</p>
-
-                  <div className="pt-3">
-                    <p className="text-[13px] font-bold">
-                      Broker : <span className="ml-2 underline font-black uppercase text">{advice.brokerName}</span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Right Side: Signatures & Compnay Name*/}
-                <div className="col-span-12 text-right space-y-2">
-                  <div className="flex justify-end items-center gap-3">
-                    {/*Thank you icon*/}
-                    <div className="text-left">
-                      <p className="text-[13px] font-bold text-slate-800">Thanking You</p>
-                      <p className="text-[12px] font-semibold text-slate-600">Yours faithfully</p>
-                    </div>
-                  </div>
-
-                  <p className="text-[14px] font-bold text-black">
-                    For <span className="uppercase">Shalimar Roller Flour Mill</span>
-                  </p>
-
-                  <div className="pt-7">
-                    <p className="text-[10px] font-bold text-slate-700">
-                      Authorised Signatory <span className="inline-block border-b border-slate-400 w-32 ml-1" />
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className="border border-dashed border-black rounded-md p-2 text-[9.5px] text-slate-800 leading-tight mb-2 bg-slate-50/50">
+              The Payment for your above bill(s) is being made with the clear understanding that you have purchased the wheat from your local & delivered to us against the bargain on our Mill delivery basis & that all taxes / levies as applicable in your state will be paid by you. We are in no way responsible for any taxes or levies. Your acceptance of the DD wii confirm your acceptance of these facts.
             </div>
-
           </div>
+
+          {}
+          <div className="pt-2 border-t border-slate-300">
+            {/* Corrected grid columns: 7 columns for Terms, 5 columns for Signature */}
+            <div className="grid grid-cols-12 gap-3 items-end">
+              {/* Left Side: Terms and Conditions */}
+              <div className="col-span-7 space-y-1.5">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-black font-extrabold text-[11px] uppercase tracking-wide">
+                    TERMS AND CONDITIONS:
+                  </span>
+                </div>
+
+                <ol className="list-decimal pl-4 text-[9px] text-slate-800 space-y-0.5 font-semibold">
+                  <li>Subject to Hyderabad Jurisdiction.</li>
+                  <li>Payments are made through account payee demand drafts only. Cash will not be paid in any circumstances.</li>
+                  <li>If there is undue delay (more than 60 days) in payment kindly confirm the balance with us.</li>
+                </ol>
+
+                <p className="text-[10px] font-bold text-slate-900 pt-1">Encl. as above</p>
+
+                <div className="pt-1">
+                  <p className="text-[11.5px] font-bold">
+                    Broker :{" "}
+                    <span className="ml-2 font-black uppercase text-black underline underline-offset-2">
+                      {advice.brokerName}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Side: Signatures & Company Name */}
+              <div className="col-span-5 text-right space-y-1.5">
+                <div className="flex justify-end items-center gap-2">
+                  <div className="text-right">
+                    <p className="text-[11.5px] font-bold text-slate-900 leading-none">Thanking You</p>
+                    <p className="text-[10.5px] font-semibold text-slate-700 mt-0.5 leading-none">Yours faithfully</p>
+                  </div>
+                </div>
+
+                <p className="text-[11.5px] font-black text-black">
+                  For <span className="uppercase">Shalimar Roller Flour Mill</span>
+                </p>
+
+                <div className="pt-5 flex items-center justify-end">
+                  <span className="text-[10px] font-bold text-slate-800 whitespace-nowrap">
+                    Authorised Signatory
+                  </span>
+                  <span style={{ ...underlineStyle, width: "110px", marginLeft: "6px" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
-      
+      </div>
     </div>
   );
 });
+
 export default PrintableInvoice;
