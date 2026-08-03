@@ -1,327 +1,228 @@
-import React from "react";
-import { useReactToPrint } from "react-to-print";
-import shalimarLogo from "../Images/shalimarLogo.png";
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const path = require("path");
+const isDev = require("electron-is-dev");
+const fs = require("fs");
+const Database = require("better-sqlite3");
+const db = new Database("payment_advice.db");
 
-const SAMPLE_DATA = {
-  adviceNo: "592",
-  refNo: "SRFM968",
-  date: "16-Sep-2022",
-  partyName: "M/s. AMBIKA ENTERPRISES",
-  partyLocation: "SEONI",
-  billNo: "215",
-  receivedDate: "08-Sep-2022",
-  rtgsNo: "456465",
-  rtgsDate: "16-Sep-2022",
-  bankNameAndAcc: "CBIN0282063 , A/c: 3786228952",
-  amountRs: "920968.00",
-  totalBills: 1,
-  cashDiscountPercent: 4,
-  cashDiscountAmount: "39730.00",
-  unloading: "590",
-  cashPaid: "2360.00",
-  shortage: "-",
-  lateLoading: "-",
-  rateDiff: "-",
-  qualityDiffText: "356 Qntl x 45 [ ]",
-  qualityDiffAmount: "16020.00",
-  tableItems: [
-    {
-      sno: 1,
-      qty: "356",
-      rate: "2790.00",
-      amount: "993240.00",
-      netWt: "13169.00",
-      netAmt: "980071.00"
-    }
-  ],
-  totalAmount: "980071.00",
-  tdsAmount: "993.00",
-  lessDeductions: "58110.00",
-  netAmount: "920968.00",
-  brokerName: "KALYANJI"
-};
+let mainWindow;
 
-const PrintableInvoice = React.forwardRef(({ data }, ref) => {
-  const advice = { ...SAMPLE_DATA };
+db.prepare(
+  `
+CREATE TABLE IF NOT EXISTS advices (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  location TEXT,
+  partyName TEXT,
+  broker TEXT,
+  accountNo TEXT,
+  adviceNo TEXT,
+  date TEXT,
+  refNo TEXT,
+  outstandingBillNo TEXT,
+  receivedDate TEXT,
+  paymentMode TEXT,
+  chqNo TEXT,
+  chqDate TEXT,
+  bankName TEXT,
+  bankCode TEXT,
+  remarks TEXT,
+  cashDiscountPercent REAL,
+  unloading REAL,
+  cashPaid REAL,
+  shortage REAL,
+  lateLoading REAL,
+  rateDiff REAL,
+  other1 REAL,
+  other2 REAL,
+  additionalCharges REAL,
+  totalItemAmount REAL,
+  totalQualityDiffAmount REAL,
+  cashDiscountAmount REAL,
+  totalDeductions REAL,
+  netAmountIssued REAL
+)`,
+).run();
 
-  return (
-    <div>
-      
-        {/* Outer A4 Page Container */}
-        <div
-          ref={ref}
-          style={{ width: "210mm", height: "297mm", margin:"0 auto", boxSizing:"border-box"}}
-          className="bg-white text font-sans  shadow-lg border border-black relative box-sizing flex flex-col justify-between origin-top"
-        >
-          <div className="border-2 border-black p-3 h-full flex flex-col justify-between text-[11px] leading-snug">
+db.prepare(
+  `
+CREATE TABLE IF NOT EXISTS items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  adviceId INTEGER,
+  qty TEXT,
+  rate TEXT,
+  netWeight TEXT,
+  FOREIGN KEY(adviceId) REFERENCES advices(id)
+)`,
+).run();
 
-            <div>
-              { }
-              <div className="relative mb-4">
-                <div className="absolute bg-black text-white px-4 py-2 rounded-br-2xl rounded-tl-md font-bold text-sm shadow-sm">
-                  No. {advice.adviceNo}
-                </div>
+db.prepare(
+  `
+CREATE TABLE IF NOT EXISTS qualityDiffs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  adviceId INTEGER,
+  qty TEXT,
+  uom TEXT,
+  rate TEXT,
+  remarks TEXT,
+  FOREIGN KEY(adviceId) REFERENCES advices(id)
+)`,
+).run();
 
-                {/* Center Company Branding */}
-                <div className="text-center pt-1">
-                  <div className="inline-flex items-center gap-3">
-                    <div className="text-left">
-                      <p className="text-[11px] font-bold tracking-widest text-[#002D62] uppercase py-2">PAYMENT ADVICE</p>
-                      <img src={shalimarLogo} height="65px" width="150px" alt="Company Logo" />
-                    </div>
-                  </div>
-                  <p className="text-[9.5px] font-bold text-slate-700 mt-1 pb-1 border-b border-slate-300">
-                    15-1-503/A/9, ASHOK MARKET, SIDDIAMBER BAZAR, HYDERABAD - 12. [A.P]
-                  </p>
-                </div>
+ipcMain.handle("save-advice", (event, formData) => {
+  console.log("Prabhas", formData);
+  const result = db
+    .prepare(
+      `
+    INSERT INTO advices (
+  location, partyName, broker, accountNo, adviceNo, date, refNo,
+  outstandingBillNo, receivedDate, paymentMode, chqNo, chqDate,
+  bankName, bankCode, remarks, cashDiscountPercent, unloading,
+  cashPaid, shortage, lateLoading, rateDiff, other1, other2,
+  additionalCharges, totalItemAmount, totalQualityDiffAmount,
+  cashDiscountAmount, totalDeductions, netAmountIssued
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  `,
+    )
+    .run(
+      formData.location,
+      formData.partyName,
+      formData.broker,
+      formData.accountNo,
+      formData.adviceNo,
+      formData.date,
+      formData.refNo,
+      formData.outstandingBillNo,
+      formData.receivedDate,
+      formData.paymentMode,
+      formData.chqNo,
+      formData.chqDate,
+      formData.bankName,
+      formData.bankCode,
+      formData.remarks,
+      formData.cashDiscountPercent,
+      formData.unloading,
+      formData.cashPaid,
+      formData.shortage,
+      formData.lateLoading,
+      formData.rateDiff,
+      formData.other1,
+      formData.other2,
+      formData.additionalCharges,
+      formData.totalItemAmount,
+      formData.totalQualityDiffAmount,
+      formData.cashDiscountAmount,
+      formData.totalDeductions,
+      formData.netAmountIssued,
+    );
 
-                {/* Right Side Contact Info */}
-                <div className="absolute top-0 right-0 text-[10px] text-black space-y-0.5 font-medium text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" /></svg>
-                    <span>Phone: 24741736</span>
-                  </div>
-                  <p>24745058</p>
-                  <p>24614929</p>
-                  <div className="flex items-center justify-end gap-1 mt-1">
-                    <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M19 8B1 1 0 0 0 19 6H5B1 1 0 0 0 5 8V16B1 1 0 0 0 5 18H19B1 1 0 0 0 19 16V8M19 18H5V10L12 14.5L19 10V18M12 12.5L5 8H19L12 12.5Z" /></svg>
-                    <span>Fax: 91-40-24605536</span>
-                  </div>
-                  <div className="flex items-center justify-end gap-1">
-                    <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" /></svg>
-                    <span>Email: shalimar_srfm@rediffmail.com</span>
-                  </div>
-                </div>
-              </div>
+  const adviceId = result.lastInsertRowid;
+  formData.items.forEach((item) => {
+    db.prepare(
+      `INSERT INTO items (adviceId, qty, rate, netWeight) VALUES (?,?,?,?)`,
+    ).run(adviceId, item.qty, item.rate, item.netWeight);
+  });
 
-              { }
-              <div className="flex justify-between font-bold text-[13px] mb-1">
-                <div>Ref. No. {advice.refNo}</div>
-                <div>Date : {advice.date}</div>
-              </div>
+  // Insert quality diffs
+  formData.qualityDiffs.forEach((qd) => {
+    db.prepare(
+      `INSERT INTO qualityDiffs (adviceId, qty, uom, rate, remarks) VALUES (?,?,?,?,?)`,
+    ).run(adviceId, qd.qty, qd.uom, qd.rate, qd.remarks);
+  });
 
-              <div className="mb-2">
-                <p className="font-bold text-[13px]">To,</p>
-                <div className="flex items-start gap-2 pl-2 mt-0.5">
-                  {/**Party icon should come here */}
-                  <div>
-                    <p className="font-bold text-[13px] text-slate-900">
-                      Party's Name & Address :</p>
-                  </div>
-                  <div className="flex flex-col">
-                    <p className="uppercase text-[12px] inline-block border-b border-slate-500 w-48">{advice.partyName}</p>
-                    <p className="font-bold text-[12px] pl-29 uppercase text-slate-800 inline-block border-b border-slate-500 w-48">{advice.partyLocation}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sub & Received Box */}
-              <div className="border border-black rounded-md p-1.5 flex justify-between items-center font-bold text-[12.5px] mb-2">
-                <div>Sub: Your outstanding Bill No. <span className="ml-4 font-extrabold">{advice.billNo}</span></div>
-                <div>Received on dated <span className="ml-4 font-extrabold">{advice.receivedDate}</span></div>
-              </div>
-
-              {/* Covering Letter Box */}
-              <div className="border border-dashed border-black rounded-md p-2 mb-2 text-[13px] leading-relaxed">
-                <p className="font-bold mb-1">Dear Sir,</p>
-                <div className="pl-4 space-y-1">
-                  <p>
-                    Please find enclosed here with RTGS No. <span className="inline-block border-b border-slate-400 w-48 text-center font-semibold">{advice.rtgsNo}</span> Dated <span className="inline-block font-semibold px-2">{advice.rtgsDate}</span>
-                    drawn on <span className="inline-block border-b border-slate-400 font-semibold px-4">{advice.bankNameAndAcc}</span> in your favour
-                    for Rs. <span className="inline-block font-bold text-slate-900 px-2">{advice.amountRs}</span> towards. full and final/part payment as per the details as under.
-                  </p>
-                </div>
-              </div>
-
-              { }
-              <div className="grid grid-cols-12 gap-2 mb-2">
-                {/* Left Column: Deductions Breakdown */}
-                <div className="col-span-5 border border-black p-2 flex flex-col justify-between text-[13px]">
-                  <div className="space-y-1">
-                    <p className="font-bold">1) Total of <span className="border-b border-slate-400 px-2">{advice.totalBills}</span> Bills.</p>
-                    <p className="font-bold">2) LESS</p>
-
-                    <div className="pl-3 space-y-0.5">
-                      <div className="flex justify-between">
-                        <span>a) Cash Discount ({advice.cashDiscountPercent} %)</span>
-                        <span className="font-mono">: {advice.cashDiscountAmount}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>b) Unloading</span>
-                        <span className="font-mono">: {advice.unloading}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>c) Cash Paid</span>
-                        <span className="font-mono">: {advice.cashPaid}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>d) Shortage</span>
-                        <span className="font-mono">: {advice.shortage}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>e) Late Loading</span>
-                        <span className="font-mono">: {advice.lateLoading}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>f) Rate Difference</span>
-                        <span className="font-mono">: {advice.rateDiff}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>g)</span>
-                        <span className="font-mono">: -</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>h)</span>
-                        <span className="font-mono">: -</span>
-                      </div>
-                    </div>
-
-                    <div className="pt-1">
-                      <p className="font-bold">3) Quality Difference</p>
-                      <div className="flex justify-between pl-3 mt-0.5 font-medium">
-                        <span>{advice.qualityDiffText}</span>
-                        <span className="font-mono">: {advice.qualityDiffAmount}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column: Table & Summary Cards */}
-                <div className="col-span-7 flex flex-col justify-between border border-slate-200 overflow-hidden">
-                  {/* Table */}
-                  <div>
-                    <table className="w-full text-center text-[13px] border border-collapse border-black">
-                      <thead>
-                        <tr className="text-black font-bold border border-black">
-                          <th className="p-1 border border-black">Sno</th>
-                          <th className="p-1 border border-black">Qty</th>
-                          <th className="p-1 border border-black">Rate</th>
-                          <th className="p-1 border border-black">Amount</th>
-                          <th className="p-1 border border-black">Net Wt</th>
-                          <th className="p-1 border border-black">Net Amt</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        {advice.tableItems.map((item, idx) => (
-                          <tr key={idx} className="font-medium text-slate-800">
-                            <td className="p-1 border border-slate-500">{item.sno}.</td>
-                            <td className="p-1 border border-slate-500">{item.qty}</td>
-                            <td className="p-1 border border-slate-500">{item.rate}</td>
-                            <td className="p-1 border border-slate-500">{item.amount}</td>
-                            <td className="p-1 border border-slate-500">{item.netWt}</td>
-                            <td className="p-1 border border-slate-500">{item.netAmt}</td>
-                          </tr>
-                        ))}
-                        {/* Empty padding rows for structural height match */}
-                        {Array.from({ length: Math.max(0, 3 - advice.tableItems.length) }).map((_, i) => (
-                          <tr key={i} className="h-6">
-                            <td className="border border-slate-500" />
-                            <td className="border border-slate-500" />
-                            <td className="border border-slate-500" />
-                            <td className="border border-slate-500" />
-                            <td className="border border-slate-500" />
-                            <td />
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Subtotals & Deductions */}
-                  <div className="border border-black p-2 space-y-1 bg-slate text-[13px] font-bold">
-                    <div className="flex justify-between">
-                      <span className="text-black">Total Amount</span>
-                      <span className="font-mono text-slate-900">{advice.totalAmount}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-black">Tds <span className="font-normal text-slate-500 ml-2">[ - ]</span></span>
-                      <span className="font-mono text-slate-900">{advice.tdsAmount}</span>
-                    </div>
-                    <div className="flex justify-between items-center pt-2">
-                      <span className="text-black">Less Deductions <span className="font-normal text-slate-500 ml-2">[ - ]</span></span>
-                      <span className="font-mono text-slate-900">{advice.lessDeductions}</span>
-                    </div>
-                  </div>
-
-                  {/* Net Amount Banner */}
-                  <div className="text-black flex justify-between items-center p-2 font-bold border border-black">
-                    <span className="text-xs uppercase tracking-wide">Nett. Amount</span>
-                    <div className="text-black px-3 py-1 rounded text-sm font-black font-mono">
-                      {advice.netAmount}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              { }
-              <div className="flex items-center gap-2 mb-2 font-bold text-[14px] text-black">
-                <div className="bg-[#002D62] text-white rounded-full p-1">
-                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" /></svg>
-                </div>
-                <span>Please Credit the same to our A/c. and acknowledge the receipt at your earliest,</span>
-              </div>
-
-              <div className="border border-dashed border-black rounded-md p-2 text-[12px] text leading-tight mb-1">
-                The Payment for your above bill(s) is being made with the clear understanding that you have purchased the wheat from your local & delivered to us against the bargain on our Mill delivery basis & that all taxes / levies as applicable in your state will be paid by you. We are in no way responsible for any taxes or levies. Your acceptance of the DD wii confirm your acceptance of these facts.
-              </div>
-            </div>
-
-            { }
-            <div>
-              <div className="grid grid-cols-12 gap-4 items-end pt-1">
-                {/* Left Side: Terms and Conditions */}
-                <div className="col-span-10 space-y-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="bg-[#002D62] text-white rounded-full p-1">
-                      <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
-                    </div>
-                    <span className=" text-black font-bold text-[12px] px-2 py-1 rounded uppercase tracking-wider">
-                      TERMS AND CONDITIONS:
-                    </span>
-                  </div>
-
-                  <ol className="list-decimal pl-4 text-[10.5px] text-slate-800 space-y-1.5 font-medium">
-                    <li>Subject to Hyderabad Jurisdiction.</li>
-                    <li>Payments are made through account payee demand drafts only. Cash will not be paid in any circumstances.</li>
-                    <li>If there is undue delay (more than 60 days) in payment kindly confirm the balance with us.</li>
-                  </ol>
-
-                  <p className="text-[10px] font-bold text-slate-900 pt-1">Encl. as above</p>
-
-                  <div className="pt-3">
-                    <p className="text-[13px] font-bold">
-                      Broker : <span className="ml-2 underline font-black uppercase text">{advice.brokerName}</span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Right Side: Signatures & Compnay Name*/}
-                <div className="col-span-12 text-right space-y-2">
-                  <div className="flex justify-end items-center gap-3">
-                    {/*Thank you icon*/}
-                    <div className="text-left">
-                      <p className="text-[13px] font-bold text-slate-800">Thanking You</p>
-                      <p className="text-[12px] font-semibold text-slate-600">Yours faithfully</p>
-                    </div>
-                  </div>
-
-                  <p className="text-[14px] font-bold text-black">
-                    For <span className="uppercase">Shalimar Roller Flour Mill</span>
-                  </p>
-
-                  <div className="pt-7">
-                    <p className="text-[10px] font-bold text-slate-700">
-                      Authorised Signatory <span className="inline-block border-b border-slate-400 w-32 ml-1" />
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      
-    </div>
-  );
+  return adviceId;
 });
-export default PrintableInvoice;
+ipcMain.handle("get-advice", (event, adviceId) => {
+  const advice = db.prepare("SELECT * FROM advices WHERE id = ?").get(adviceId);
+  const items = db
+    .prepare("SELECT * FROM items WHERE adviceId = ?")
+    .all(adviceId);
+  const qualityDiffs = db
+    .prepare("SELECT * FROM qualityDiffs WHERE adviceId = ?")
+    .all(adviceId);
+
+  return { ...advice, items, qualityDiffs };
+});
+
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  });
+
+  const startUrl = isDev
+    ? "http://localhost:5173"
+    : `file://${path.join(__dirname, "../build/index.html")}`;
+
+  mainWindow.loadURL(startUrl);
+
+  if (isDev) {
+    // mainWindow.webContents.openDevTools();
+  }
+}
+
+app.whenReady().then(createWindow);
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
+});
+
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
+
+ipcMain.handle("generate-pdf", async (event, formData) => {
+  const { filePath } = await dialog.showSaveDialog({
+    title: "Save Payment Advice PDF",
+    defaultPath: `Payment_Advice_${formData?.adviceNo || "563"}.pdf`,
+    filters: [{ name: "PDF Files", extensions: ["pdf"] }],
+  });
+
+  if (!filePath) return { success: false, message: "Cancelled by user" };
+
+  // 2. Create a hidden window for isolated A4 rendering
+  const printWindow = new BrowserWindow({
+    show: false, // Keep invisible
+    width: 794, // Exact A4 width at 96 DPI (210mm)
+    height: 1123, // Exact A4 height at 96 DPI (297mm)
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  });
+
+  try {
+    // Pass form data via URL query parameters to the print route
+    const encodedData = encodeURIComponent(JSON.stringify(formData));
+    const startUrl = isDev
+      ? `http://localhost:5173/#/print-preview?data=${encodedData}`
+      : `file://${path.join(__dirname, "../build/index.html")}#/print-preview?data=${encodedData}`;
+
+    await printWindow.loadURL(startUrl);
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    const pdfBuffer = await printWindow.webContents.printToPDF({
+      pageSize: "A4",
+      printBackground: true,
+      marginsType: 1,
+    });
+
+    fs.writeFileSync(filePath, pdfBuffer);
+    printWindow.close();
+
+    return { success: true, filePath };
+  } catch (error) {
+    if (!printWindow.isDestroyed()) printWindow.close();
+    return { success: false, error: error.message };
+  }
+});
