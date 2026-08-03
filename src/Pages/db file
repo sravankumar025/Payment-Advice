@@ -1,0 +1,146 @@
+const { app, BrowserWindow, ipcMain } = require('electron');
+const Database = require('better-sqlite3');
+
+const db = new Database('payment_advice.db');
+
+// --- Schema creation ---
+db.prepare(`
+CREATE TABLE IF NOT EXISTS advice (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  location TEXT,
+  partyName TEXT,
+  broker TEXT,
+  accountNo TEXT,
+  adviceNo TEXT,
+  date TEXT,
+  refNo TEXT,
+  outstandingBillNo TEXT,
+  receivedDate TEXT,
+  paymentMode TEXT,
+  chqNo TEXT,
+  chqDate TEXT,
+  bankName TEXT,
+  bankCode TEXT,
+  remarks TEXT,
+  cashDiscountPercent REAL,
+  unloading REAL,
+  cashPaid REAL,
+  shortage REAL,
+  lateLoading REAL,
+  rateDiff REAL,
+  other1 REAL,
+  other2 REAL,
+  additionalCharges REAL,
+  totalItemAmount REAL,
+  totalQualityDiffAmount REAL,
+  cashDiscountAmount REAL,
+  totalDeductions REAL,
+  netAmountIssued REAL
+)`).run();
+
+db.prepare(`
+CREATE TABLE IF NOT EXISTS items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  adviceId INTEGER,
+  qty TEXT,
+  rate TEXT,
+  netWeight TEXT,
+  FOREIGN KEY(adviceId) REFERENCES advice(id)
+)` ).run();
+
+db.prepare(`
+CREATE TABLE IF NOT EXISTS qualityDiffs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  adviceId INTEGER,
+  qty TEXT,
+  uom TEXT,
+  rate TEXT,
+  remarks TEXT,
+  FOREIGN KEY(adviceId) REFERENCES advice(id)
+)` ).run();
+
+// --- Insert handler ---
+ipcMain.handle('save-advice', (event, formData) => {
+  const result = db.prepare(`
+    INSERT INTO advice (
+      location, partyName, broker, accountNo, adviceNo, date, refNo,
+      outstandingBillNo, receivedDate, paymentMode, chqNo, chqDate,
+      bankName, bankCode, remarks, cashDiscountPercent, unloading,
+      cashPaid, shortage, lateLoading, rateDiff, other1, other2,
+      additionalCharges, totalItemAmount, totalQualityDiffAmount,
+      cashDiscountAmount, totalDeductions, netAmountIssued
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  `).run(
+    formData.location, formData.partyName, formData.broker, formData.accountNo,
+    formData.adviceNo, formData.date, formData.refNo, formData.outstandingBillNo,
+    formData.receivedDate, formData.paymentMode, formData.chqNo, formData.chqDate,
+    formData.bankName, formData.bankCode, formData.remarks,
+    formData.cashDiscountPercent, formData.unloading, formData.cashPaid,
+    formData.shortage, formData.lateLoading, formData.rateDiff,
+    formData.other1, formData.other2, formData.additionalCharges,
+    formData.totalItemAmount, formData.totalQualityDiffAmount,
+    formData.cashDiscountAmount, formData.totalDeductions,
+    formData.netAmountIssued
+  );
+
+  const adviceId = result.lastInsertRowid;
+
+  // Insert items
+  formData.items.forEach(item => {
+    db.prepare(`INSERT INTO items (adviceId, qty, rate, netWeight) VALUES (?,?,?,?)`)
+      .run(adviceId, item.qty, item.rate, item.netWeight);
+  });
+
+  // Insert quality diffs
+  formData.qualityDiffs.forEach(qd => {
+    db.prepare(`INSERT INTO qualityDiffs (adviceId, qty, uom, rate, remarks) VALUES (?,?,?,?,?)`)
+      .run(adviceId, qd.qty, qd.uom, qd.rate, qd.remarks);
+  });
+
+  return adviceId;
+});
+
+// --- Fetch handler ---
+ipcMain.handle('get-advice', (event, adviceId) => {
+  const advice = db.prepare("SELECT * FROM advice WHERE id = ?").get(adviceId);
+  const items = db.prepare("SELECT * FROM items WHERE adviceId = ?").all(adviceId);
+  const qualityDiffs = db.prepare("SELECT * FROM qualityDiffs WHERE adviceId = ?").all(adviceId);
+
+  return { ...advice, items, qualityDiffs };
+});
+
+ /---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+Preload.js
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  saveAdvice: (formData) => ipcRenderer.invoke('save-advice', formData),
+  getAdvice: (id) => ipcRenderer.invoke('get-advice', id)
+});
+
+
+
+
+/---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------/
+
+Form.jsx
+  const handleSubmitData = (formData) => {
+  window.electronAPI.saveAdvice(formData)
+    .then(id => {
+      console.log("Data Saved Successfully with ID:", id);
+    })
+    .catch(err => {
+      console.error("Error saving advice:", err);
+    });
+};
+
+const fetchAdvice = (id) => {
+  window.electronAPI.getAdvice(id)
+    .then(data => {
+      console.log("Fetched advice:", data);
+    })
+    .catch(err => {
+      console.error("Error fetching advice:", err);
+    });
+};
+
