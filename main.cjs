@@ -2,13 +2,51 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
+const Database = require("better-sqlite3");
+const db = new Database("payment_advice.db");
 
 let mainWindow;
+
+db.prepare(`CREATE TABLE IF NOT EXISTS advice(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  adviceNo TEXT,
+  partyName TEXT
+  )`).run();
+
+
+ipcMain.handle('save-advice', (event, formData) => {
+   console.log("Received in main:", formData); 
+  const indertAdvice = db.prepare(`
+    INSERT INTO advice (adviceNo,partyName) VALUES (?, ?)
+    `);
+
+  const result = indertAdvice.run(formData.adviceNo, formData.partyName);
+  return result.lastInsertRowid;
+});
+
+ipcMain.handle('get-advices', (event) => {
+  try {
+    const stmt = db.prepare(`SELECT * FROM advice ORDER BY id DESC`);
+    const rows = stmt.all(); // returns array of objects
+    return rows;
+  } catch (err) {
+    console.error("Error in get-advices:", err);
+    throw err; 
+  }
+})
+
+ipcMain.handle('delete-null-advices', (event) => {
+  const stmt = db.prepare(`
+    DELETE FROM advice
+  `);
+  const result = stmt.run();
+  return result.changes; // number of rows deleted
+});
 
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
-    height: 1000,
+    height: 800,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
@@ -23,7 +61,7 @@ function createWindow() {
   mainWindow.loadURL(startUrl);
 
   if (isDev) {
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
   }
 }
 
@@ -42,7 +80,6 @@ app.on('activate', () => {
 });
 
 ipcMain.handle("generate-pdf", async (event, formData) => {
-  // 1. Show Save Dialog
   const { filePath } = await dialog.showSaveDialog({
     title: "Save Payment Advice PDF",
     defaultPath: `Payment_Advice_${formData?.adviceNo || "563"}.pdf`,
@@ -72,18 +109,17 @@ ipcMain.handle("generate-pdf", async (event, formData) => {
 
     await printWindow.loadURL(startUrl);
 
-    // Wait briefly for React components & web fonts to paint
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    // 3. Generate clean vector PDF from the isolated route
+
     const pdfBuffer = await printWindow.webContents.printToPDF({
       pageSize: "A4",
       printBackground: true,
-      marginsType: 1 // Fixed typo: 'marginsType' with an 's'
+      marginsType: 1
     });
 
     fs.writeFileSync(filePath, pdfBuffer);
-    printWindow.close(); // Clean up hidden window
+    printWindow.close();
 
     return { success: true, filePath };
   } catch (error) {
