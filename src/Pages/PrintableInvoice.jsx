@@ -50,20 +50,20 @@ const PrintableInvoice = React.forwardRef(({ data }, ref) => {
       {/* Outer A4 Page Container */}
       <div
         ref={ref}
-        style={{ width: "210mm", height: "297mm", margin: "0 auto", boxSizing: "border-box" }}
+        style={{ width: "210mm",height:"297mm", margin: "0 auto", boxSizing: "border-box" }}
         className="bg-white text font-sans  shadow-lg relative box-sizing flex flex-col justify-between origin-top"
       >
         <div style={{ margin: "10px" }} className="border border-black p-3 h-full flex flex-col justify-between text-[11px] leading-snug">
 
           <div>
             { }
-            <div className="relative mb-4">
+            <div className="relative mb-2">
               <div className="text-xs">
                 No. {advice.adviceNo}
               </div>
 
               {/* Center Company Branding */}
-              <div className="text-center pt-1">
+              <div className="text-center">
                 <div className="inline-flex items-center gap-3">
                   <div className="text-left">
                     <p className="text-[11px] font-bold tracking-widest text-[#002D62] uppercase py-2">PAYMENT ADVICE</p>
@@ -96,7 +96,7 @@ const PrintableInvoice = React.forwardRef(({ data }, ref) => {
 
             <div className="mb-2">
               <p className="font-bold text-[13px]">To,</p>
-              <div className="flex items-start gap-2 pl-2 mt-0.5">
+              <div className="flex items-start gap-2 pl-1 mt-0.5">
                 {/**Party icon should come here */}
                 <div>
                   <p className="font-bold text-[13px] text-slate-900">
@@ -118,14 +118,14 @@ const PrintableInvoice = React.forwardRef(({ data }, ref) => {
             </div>
 
             {/* Sub & Received Box */}
-            <div className="border border-black rounded-md h-8 flex justify-between items-center font-bold text-[12.5px] mb-4 px-2 leading-normal">
+            <div className="border border-black rounded-md flex justify-between items-center font-bold text-[12.5 px] mb-4 px-2 pt-0 pb-2">
               <div className="flex items-center">Sub: Your outstanding Bill No. <span className="ml-4 font-extrabold">{advice.billNo}</span></div>
               <div className="flex items-center">Received on dated <span className="ml-4 font-extrabold">{advice.receivedDate}</span></div>
             </div>
 
             {/* Covering Letter Box */}
-            <div className="border border-dashed border-black rounded-md p-2 mb-2 text-[13px] leading-relaxed">
-              <p className="font-bold mb-1">Dear Sir,</p>
+            <div className="border border-dashed border-black rounded-md pt-0 px-2 pb-2 mb-2 text-[13px] leading-relaxed">
+              <p className="font-bold ">Dear Sir,</p>
               <div className="pl-4 space-y-1">
                 <p>
                   Please find enclosed here with RTGS No. <span className="inline-block align-middle border-b border-slate-400 font-semibold px-2 pb-0.5">{advice.rtgsNo} </span>
@@ -223,7 +223,7 @@ const PrintableInvoice = React.forwardRef(({ data }, ref) => {
                           <td className="border border-black" />
                           <td className="border border-black" />
                           <td className="border border-black" />
-                          <td />
+                          <td className="border border-black"/>
                         </tr>
                       ))}
                     </tbody>
@@ -247,7 +247,7 @@ const PrintableInvoice = React.forwardRef(({ data }, ref) => {
                 </div>
 
                 {/* Net Amount Banner */}
-                <div className="text-black flex justify-between items-center p-2 font-bold border border-black">
+                <div className="text-black flex justify-between items-center px-2 pb-2 font-bold border border-black">
                   <span className="text-xs uppercase tracking-wide">Nett. Amount</span>
                   <div className="text-black px-3 py-1 rounded text-sm font-black font-mono">
                     {advice.netAmount}
@@ -261,7 +261,7 @@ const PrintableInvoice = React.forwardRef(({ data }, ref) => {
               <span>Please Credit the same to our A/c. and acknowledge the receipt at your earliest,</span>
             </div>
 
-            <div className="border border-dashed border-black rounded-md p-2 text-[12px] text leading-tight mb-1">
+            <div className="border border-dashed border-black rounded-md pt-0 pb-2 px-2 text-[12px] text leading-tight mb-1">
               The Payment for your above bill(s) is being made with the clear understanding that you have purchased the wheat from your local & delivered to us against the bargain on our Mill delivery basis & that all taxes / levies as applicable in your state will be paid by you. We are in no way responsible for any taxes or levies. Your acceptance of the DD wii confirm your acceptance of these facts.
             </div>
           </div>
@@ -315,10 +315,10 @@ const PrintableInvoice = React.forwardRef(({ data }, ref) => {
                   For <span className="uppercase">Shalimar Roller Flour Mill</span>
                 </p>
 
-                <div className="flex justify-end pt-6">
-                  <p className="text-[10px] font-bold text-slate-700 flex items-center">
+                <div className="flex justify-end">
+                  <p className="text-[11px] font-bold text-slate-800 flex items-center">
                     Authorised Signatory
-                    <span className="ml-2 inline-block border-b border-slate-400 w-32 pb-1" />
+                    <span className="ml-2 inline-block border-b border-slate-400 w-32 pt-4" />
                   </p>
                 </div>
               </div>
