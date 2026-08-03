@@ -23,6 +23,7 @@ import html2canvas from "html2canvas";
 export default function PaymentAdviceForm() {
   // --- State Management ---
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [advice, setAdvices] = useState([]);
   // Header & Transaction Info
   const [formData, setFormData] = useState({
     location: "",
@@ -160,29 +161,74 @@ export default function PaymentAdviceForm() {
     netAmountIssued,
   };
 
+  useEffect(() => {
+    console.log("FormData ", formData);
+    console.log("Deductions",deductions);
+    
+    window.electronAPI.getAdvices()
+      .then(rows => {
+        console.log("fetched rows: ", rows);
+        setAdvices(rows);
+      })
+      .catch(err => {
+        console.error("Error in fetching the records");
+      })
+
+  }, [])
   const contentRef = useRef(null);
 
   const handleDownloadPdf = async () => {
-    
-    const element = document.getElementById("invoice"); 
+
+    const element = document.getElementById("invoice");
     if (!element) {
       console.error("Invoice element not found");
       return;
     }
 
-    const canvas = await html2canvas(element, { scale: 2 });
+    const canvas = await html2canvas(element, { scale: 2, width: element.offsetWidth, height: element.offsetHeight });
     const imgData = canvas.toDataURL("image/png");
 
     // Create PDF
     const pdf = new jsPDF("p", "mm", "a4");
     const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    const pdfHeight = pdf.internal.pageSize.getHeight();
 
     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
     pdf.save("Payment_Advice_Custom.pdf");
 
-    
+
   };
+
+  const data1 = {
+    adviceNo: "895",
+    partyName: "Shalimar Roller Flour Mill"
+  }
+  const handleSubmitData = () => {
+    const cleanData = {
+      adviceNo: data1.adviceNo,
+      partyName: data1.partyName
+    };
+    window.electronAPI.saveAdvice(JSON.parse(JSON.stringify(cleanData)))
+      .then(id => {
+        console.log("Data Saved Successfully");
+      })
+      .catch(err => {
+        console.log("error");
+
+      })
+  }
+
+  const handleDeleteData = () => {
+    window.electronAPI.deleteNullAdvices()
+      .then(count => {
+        console.log(`Deleted ${count} records`);
+        return window.electronAPI.getAdvices();
+      })
+      .then(rows => setAdvices(rows))
+      .catch(err => {
+        console.error("Error deleting null records:", err);
+      });
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 font-sans select-none">
@@ -387,7 +433,8 @@ export default function PaymentAdviceForm() {
                   <option value="">Select</option>
                   <option value="DD">DD</option>
                   <option value="Cheque">Cheque</option>
-                  <option value="Cash">Cash</option>
+                  <option value="Cheque">RTGS</option>
+                  <option value="Cash">NEFT</option>
                 </select>
               </div>
 
@@ -711,7 +758,7 @@ export default function PaymentAdviceForm() {
 
                 {/* FINAL FINANCIAL SUMMARY */}
                 <div className="bg-indigo-900 text-white p-4 rounded-lg space-y-3 shadow-md">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-200">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-white-200">
                     Financial Summary
                   </h3>
 
@@ -799,11 +846,15 @@ export default function PaymentAdviceForm() {
                 <Search className="w-4 h-4" /> Search
               </button>
 
-              <button className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs shadow transition">
+              <button
+                onClick={handleDeleteData}
+                className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs shadow transition">
                 <Trash2 className="w-4 h-4" /> Delete
               </button>
 
-              <button className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs shadow transition">
+              <button
+                onClick={handleSubmitData}
+                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs shadow transition">
                 <Save className="w-4 h-4" /> Save Record
               </button>
             </div>
