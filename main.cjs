@@ -1,121 +1,212 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
-const path = require('path');
-const isDev = require('electron-is-dev');
-const fs = require('fs');
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const path = require("path");
+const isDev = require("electron-is-dev");
+const fs = require("fs");
 const Database = require("better-sqlite3");
-const db = new Database("payment_advice.db");
+const db = new Database("payment_advice1.db");
 
 let mainWindow;
 
-db.prepare(`CREATE TABLE IF NOT EXISTS advice(
+// --- Schema setup ---
+db.prepare(`
+CREATE TABLE IF NOT EXISTS advices (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  location TEXT,
+  partyName TEXT,
+  broker TEXT,
+  accountNo TEXT,
   adviceNo TEXT,
-  partyName TEXT
-  )`).run();
+  date TEXT,
+  refNo TEXT,
+  outstandingBillNo TEXT,
+  receivedDate TEXT,
+  paymentMode TEXT,
+  chqNo TEXT,
+  chqDate TEXT,
+  bankName TEXT,
+  bankCode TEXT,
+  remarks TEXT,
+  cashDiscountPercent REAL,
+  unloading REAL,
+  cashPaid REAL,
+  shortage REAL,
+  lateLoading REAL,
+  rateDiff REAL,
+  other1 REAL,
+  other2 REAL,
+  additionalCharges REAL,
+  totalItemAmount REAL,
+  totalQualityDiffAmount REAL,
+  cashDiscountAmount REAL,
+  totalDeductions REAL,
+  netAmountIssued REAL
+)`).run();
 
+db.prepare(`
+CREATE TABLE IF NOT EXISTS items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  adviceId INTEGER,
+  qty TEXT,
+  rate TEXT,
+  netWeight TEXT,
+  FOREIGN KEY(adviceId) REFERENCES advices(id)
+)`).run();
 
-ipcMain.handle('save-advice', (event, formData) => {
-   console.log("Received in main:", formData); 
-  const indertAdvice = db.prepare(`
-    INSERT INTO advice (adviceNo,partyName) VALUES (?, ?)
-    `);
+db.prepare(`
+CREATE TABLE IF NOT EXISTS qualityDiffs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  adviceId INTEGER,
+  qty TEXT,
+  uom TEXT,
+  rate TEXT,
+  remarks TEXT,
+  FOREIGN KEY(adviceId) REFERENCES advices(id)
+)`).run();
 
-  const result = indertAdvice.run(formData.adviceNo, formData.partyName);
-  return result.lastInsertRowid;
-});
+// --- Save advice handler ---
+ipcMain.handle("save-advice", (event, formData) => {
+  console.log("Incoming advice data:", formData);
 
-ipcMain.handle('get-advices', (event) => {
-  try {
-    const stmt = db.prepare(`SELECT * FROM advice ORDER BY id DESC`);
-    const rows = stmt.all(); // returns array of objects
-    return rows;
-  } catch (err) {
-    console.error("Error in get-advices:", err);
-    throw err; 
+  const result = db.prepare(`
+    INSERT INTO advices (
+      location, partyName, broker, accountNo, adviceNo, date, refNo,
+      outstandingBillNo, receivedDate, paymentMode, chqNo, chqDate,
+      bankName, bankCode, remarks, cashDiscountPercent, unloading,
+      cashPaid, shortage, lateLoading, rateDiff, other1, other2,
+      additionalCharges, totalItemAmount, totalQualityDiffAmount,
+      cashDiscountAmount, totalDeductions, netAmountIssued
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  `).run(
+    formData.location,
+    formData.partyName,
+    formData.broker,
+    formData.accountNo,
+    formData.adviceNo,
+    formData.date,
+    formData.refNo,
+    formData.outstandingBillNo,
+    formData.receivedDate,
+    formData.paymentMode,
+    formData.chqNo,
+    formData.chqDate,
+    formData.bankName,
+    formData.bankCode,
+    formData.remarks,
+    formData.cashDiscountPercent,
+    formData.unloading,
+    formData.cashPaid,
+    formData.shortage,
+    formData.lateLoading,
+    formData.rateDiff,
+    formData.other1,
+    formData.other2,
+    formData.additionalCharges,
+    formData.totalItemAmount,
+    formData.totalQualityDiffAmount,
+    formData.cashDiscountAmount,
+    formData.totalDeductions,
+    formData.netAmountIssued
+  );
+
+  const adviceId = result.lastInsertRowid;
+  console.log("Inserted adviceId:", adviceId);
+
+  if (!adviceId) {
+    throw new Error("Parent advice insert failed, no valid ID returned");
   }
-})
 
-ipcMain.handle('delete-null-advices', (event) => {
-  const stmt = db.prepare(`
-    DELETE FROM advice
-  `);
-  const result = stmt.run();
-  return result.changes; // number of rows deleted
+  // Insert items (skip empty rows)
+  formData.items
+    .filter(i => i.qty || i.rate || i.netWeight)
+    .forEach(item => {
+      db.prepare(`INSERT INTO items (adviceId, qty, rate, netWeight) VALUES (?,?,?,?)`)
+        .run(adviceId, item.qty, item.rate, item.netWeight);
+    });
+
+  // Insert quality diffs (skip empty rows)
+  formData.qualityDiffs
+    .filter(qd => qd.qty || qd.rate || qd.remarks)
+    .forEach(qd => {
+      db.prepare(`INSERT INTO qualityDiffs (adviceId, qty, uom, rate, remarks) VALUES (?,?,?,?,?)`)
+        .run(adviceId, qd.qty, qd.uom, qd.rate, qd.remarks);
+    });
+
+  return adviceId;
 });
 
+// --- Get advice handler ---
+ipcMain.handle("get-advice", (event, adviceId) => {
+  const advices = db.prepare("SELECT * FROM advices").all();
+  const advice = db.prepare("SELECT * FROM advices WHERE id = ?").get(adviceId);
+  const items = db.prepare("SELECT * FROM items WHERE adviceId = ?").all(adviceId);
+  const qualityDiffs = db.prepare("SELECT * FROM qualityDiffs WHERE adviceId = ?").all(adviceId);
+
+  return { ...advice, items, qualityDiffs };
+});
+
+// --- Window setup ---
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
       contextIsolation: true,
     },
   });
 
   const startUrl = isDev
-    ? 'http://localhost:5173'
-    : `file://${path.join(__dirname, '../build/index.html')}`;
+    ? "http://localhost:5173"
+    : `file://${path.join(__dirname, "../build/index.html")}`;
 
   mainWindow.loadURL(startUrl);
-
-  if (isDev) {
-    // mainWindow.webContents.openDevTools();
-  }
 }
 
 app.whenReady().then(createWindow);
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") app.quit();
 });
 
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
 
+// --- PDF generation handler ---
 ipcMain.handle("generate-pdf", async (event, formData) => {
   const { filePath } = await dialog.showSaveDialog({
     title: "Save Payment Advice PDF",
     defaultPath: `Payment_Advice_${formData?.adviceNo || "563"}.pdf`,
-    filters: [{ name: "PDF Files", extensions: ["pdf"] }]
+    filters: [{ name: "PDF Files", extensions: ["pdf"] }],
   });
 
   if (!filePath) return { success: false, message: "Cancelled by user" };
 
-  // 2. Create a hidden window for isolated A4 rendering
   const printWindow = new BrowserWindow({
-    show: false, // Keep invisible
-    width: 794,  // Exact A4 width at 96 DPI (210mm)
-    height: 1123, // Exact A4 height at 96 DPI (297mm)
+    show: false,
+    width: 794,
+    height: 1123,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
-      contextIsolation: true
-    }
+      contextIsolation: true,
+    },
   });
 
   try {
-    // Pass form data via URL query parameters to the print route
     const encodedData = encodeURIComponent(JSON.stringify(formData));
     const startUrl = isDev
       ? `http://localhost:5173/#/print-preview?data=${encodedData}`
-      : `file://${path.join(__dirname, '../build/index.html')}#/print-preview?data=${encodedData}`;
+      : `file://${path.join(__dirname, "../build/index.html")}#/print-preview?data=${encodedData}`;
 
     await printWindow.loadURL(startUrl);
-
     await new Promise(resolve => setTimeout(resolve, 300));
-
 
     const pdfBuffer = await printWindow.webContents.printToPDF({
       pageSize: "A4",
       printBackground: true,
-      marginsType: 1
+      marginsType: 1,
     });
 
     fs.writeFileSync(filePath, pdfBuffer);
