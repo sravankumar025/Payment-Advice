@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   Printer,
   FileSpreadsheet,
@@ -16,7 +18,6 @@ import { useReactToPrint } from "react-to-print";
 import html2pdf from "html2pdf.js";
 import shalimarLogo from "../Images/shalimarLogo.png";
 import PrintableInvoice from "./PrintableInvoice";
-import toast, { Toaster } from "react-hot-toast";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -72,6 +73,27 @@ export default function PaymentAdviceForm() {
     other2: 0,
     additionalCharges: 0,
   });
+
+
+  useEffect(() => {
+    if (window.electronAPI && window.electronAPI.onDownloadStatus) {
+      const removeListener = window.electronAPI.onDownloadStatus(({ status, filename }) => {
+        if (status === "success") {
+          toast.success(`PDF downloaded successfully!`, {
+            position: "top-right",
+            autoClose: 3000,
+          });
+        } else if (status === "cancelled") {
+          toast.info("Download canceled", {
+            position: "top-right",
+            autoClose: 2000,
+          });
+        }
+      });
+
+      return () => removeListener();
+    }
+  }, []);
 
   // Real-time Clock
   useEffect(() => {
@@ -165,7 +187,7 @@ export default function PaymentAdviceForm() {
     console.log("FormData ", formData);
     console.log("Deductions",deductions);
     
-    window.electronAPI.getAdvices()
+    window.electronAPI.getAdvice(2)
       .then(rows => {
         console.log("fetched rows: ", rows);
         setAdvices(rows);
@@ -199,16 +221,10 @@ export default function PaymentAdviceForm() {
 
   };
 
-  const data1 = {
-    adviceNo: "895",
-    partyName: "Shalimar Roller Flour Mill"
-  }
+
   const handleSubmitData = () => {
-    const cleanData = {
-      adviceNo: data1.adviceNo,
-      partyName: data1.partyName
-    };
-    window.electronAPI.saveAdvice(JSON.parse(JSON.stringify(cleanData)))
+    console.log(invoiceData);
+    window.electronAPI.saveAdvice(invoiceData)
       .then(id => {
         console.log("Data Saved Successfully");
       })
@@ -839,7 +855,6 @@ export default function PaymentAdviceForm() {
                 className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-xs shadow transition"
               >
                 <Printer className="w-4 h-4" /> Print PDF
-                <Toaster position="top-right" />
               </button>
 
               <button className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg text-xs transition">
@@ -847,7 +862,6 @@ export default function PaymentAdviceForm() {
               </button>
 
               <button
-                onClick={handleDeleteData}
                 className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs shadow transition">
                 <Trash2 className="w-4 h-4" /> Delete
               </button>
@@ -872,6 +886,7 @@ export default function PaymentAdviceForm() {
           </div>
         </div>
       </main>
+       <ToastContainer />
     </div>
   );
 }
