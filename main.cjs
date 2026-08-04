@@ -156,6 +156,25 @@ function createWindow() {
     },
   });
 
+  mainWindow.webContents.session.on('will-download', (event, item, webContents) => {
+    // Detect when download completes or gets canceled
+    item.once('done', (event, state) => {
+      if (state === 'completed') {
+        mainWindow.webContents.send('download-status', {
+          status: 'success',
+          filename: item.getFilename(),
+        });
+      } else {
+        mainWindow.webContents.send('download-status', {
+          status: 'cancelled',
+          filename: item.getFilename(),
+        });
+      }
+    });
+  });
+
+  mainWindow.loadURL('http://localhost:5173');
+
   const startUrl = isDev
     ? "http://localhost:5173"
     : `file://${path.join(__dirname, "../build/index.html")}`;
