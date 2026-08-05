@@ -74,27 +74,6 @@ export default function PaymentAdviceForm() {
     additionalCharges: 0,
   });
 
-
-  useEffect(() => {
-    if (window.electronAPI && window.electronAPI.onDownloadStatus) {
-      const removeListener = window.electronAPI.onDownloadStatus(({ status, filename }) => {
-        if (status === "success") {
-          toast.success(`PDF downloaded successfully!`, {
-            position: "top-right",
-            autoClose: 3000,
-          });
-        } else if (status === "cancelled") {
-          toast.info("Download canceled", {
-            position: "top-right",
-            autoClose: 2000,
-          });
-        }
-      });
-
-      return () => removeListener();
-    }
-  }, []);
-
   // Real-time Clock
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -184,10 +163,7 @@ export default function PaymentAdviceForm() {
   };
 
   useEffect(() => {
-    console.log("FormData ", formData);
-    console.log("Deductions",deductions);
-    
-    window.electronAPI.getAdvice(2)
+    window.electronAPI.getAdvice()
       .then(rows => {
         console.log("fetched rows: ", rows);
         setAdvices(rows);
@@ -223,22 +199,21 @@ export default function PaymentAdviceForm() {
 
 
   const handleSubmitData = () => {
-    console.log(invoiceData);
     window.electronAPI.saveAdvice(invoiceData)
       .then(id => {
-        console.log("Data Saved Successfully");
+        console.log("Data Saved Successfully",id);
       })
       .catch(err => {
-        console.log("error");
+        console.log(err.message);
 
       })
   }
 
   const handleDeleteData = () => {
-    window.electronAPI.deleteNullAdvices()
+    window.electronAPI.deleteAdvices()
       .then(count => {
         console.log(`Deleted ${count} records`);
-        return window.electronAPI.getAdvices();
+        return window.electronAPI.deleteAdvices();
       })
       .then(rows => setAdvices(rows))
       .catch(err => {
@@ -862,6 +837,7 @@ export default function PaymentAdviceForm() {
               </button>
 
               <button
+                onClick={handleDeleteData}
                 className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs shadow transition">
                 <Trash2 className="w-4 h-4" /> Delete
               </button>
@@ -886,7 +862,6 @@ export default function PaymentAdviceForm() {
           </div>
         </div>
       </main>
-       <ToastContainer />
     </div>
   );
 }
