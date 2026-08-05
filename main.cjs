@@ -3,6 +3,7 @@ const path = require("path");
 const isDev = require("electron-is-dev");
 const fs = require("fs");
 const Database = require("better-sqlite3");
+const { title } = require("process");
 const db = new Database("payment_advice1.db");
 
 let mainWindow;
@@ -66,6 +67,24 @@ CREATE TABLE IF NOT EXISTS qualityDiffs (
 // --- Save advice handler ---
 ipcMain.handle("save-advice", (event, formData) => {
   console.log("Incoming advice data:", formData);
+  const requiredFields = ["partyName", "adviceNo", "location"];
+  const missing = requiredFields.filter(field => !formData[field] || formData[field].trim() === "");
+
+  if (missing.length > 0) {
+    dialog.showErrorBox(
+      "Validation Error",
+      `Cannot save advice. Missing required fields: ${missing.join(", ")}`
+    );
+    throw new Error("Validation failed");
+  }else {
+    // If validation passes, show success info box
+    dialog.showMessageBox({
+      type: "info",
+      title: "Success",
+      message: "Advice saved successfully!",
+      buttons: ["OK"]
+    });
+  }
 
   const result = db.prepare(`
     INSERT INTO advices (
@@ -141,14 +160,39 @@ ipcMain.handle("get-advice", (event, adviceId) => {
   const items = db.prepare("SELECT * FROM items WHERE adviceId = ?").all(adviceId);
   const qualityDiffs = db.prepare("SELECT * FROM qualityDiffs WHERE adviceId = ?").all(adviceId);
 
-  return { ...advice, items, qualityDiffs };
+  return { ...advices, items, qualityDiffs };
 });
+
+ipcMain.handle("delete-advices", () => {
+  try {
+    // Delete children first
+    db.prepare("DELETE FROM items").run();
+    db.prepare("DELETE FROM qualityDiffs").run();
+
+    // Then delete parent
+    const result = db.prepare("DELETE FROM advices").run();
+
+    dialog.showMessageBox({
+      type: "info",
+      title: "Delete Successful",
+      message: `Deleted ${result.changes} records from advices.`,
+      buttons: ["OK"]
+    });
+
+    return { deleted: result.changes };
+  } catch (err) {
+    console.error("Error deleting advices:", err);
+    throw err;
+  }
+
+})
 
 // --- Window setup ---
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    icon: path.join(__dirname, "src", "assets", "PA5.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
@@ -200,7 +244,15 @@ ipcMain.handle("generate-pdf", async (event, formData) => {
     filters: [{ name: "PDF Files", extensions: ["pdf"] }],
   });
 
-  if (!filePath) return { success: false, message: "Cancelled by user" };
+  if (!filePath) {
+    dialog.showMessageBox({
+      type: "info",
+      title: "Cancelled",
+      message: "PDF save was cancelled by the user.",
+      buttons: ["OK"]
+    });
+    return { success: false, message: "Cancelled by user" };
+  }
 
   const printWindow = new BrowserWindow({
     show: false,
@@ -231,9 +283,18 @@ ipcMain.handle("generate-pdf", async (event, formData) => {
     fs.writeFileSync(filePath, pdfBuffer);
     printWindow.close();
 
+    dialog.showMessageBox({
+      type: "info",
+      title: "PDF Generated",
+      message: `Payment Advice PDF saved successfully at:\n${filePath}`,
+      buttons: ["OK"]
+    });
+
     return { success: true, filePath };
   } catch (error) {
     if (!printWindow.isDestroyed()) printWindow.close();
+    dialog.showErrorBox("PDF Generation Failed", error.message);
+
     return { success: false, error: error.message };
   }
 });
