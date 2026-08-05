@@ -74,6 +74,28 @@ export default function PaymentAdviceForm() {
     additionalCharges: 0,
   });
 
+  useEffect(() => {
+    if (window.electronAPI && window.electronAPI.onDownloadStatus) {
+      const removeListener = window.electronAPI.onDownloadStatus(
+        ({ status, filename }) => {
+          if (status === "success") {
+            toast.success(`PDF downloaded successfully!`, {
+              position: "top-right",
+              autoClose: 2000,
+            });
+          } else if (status === "cancelled") {
+            toast.info("Download canceled", {
+              position: "top-right",
+              autoClose: 2000,
+            });
+          }
+        },
+      );
+
+      return () => removeListener();
+    }
+  }, []);
+
   // Real-time Clock
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -163,27 +185,33 @@ export default function PaymentAdviceForm() {
   };
 
   useEffect(() => {
-    window.electronAPI.getAdvice()
-      .then(rows => {
+    console.log("FormData ", formData);
+    console.log("Deductions", deductions);
+
+    window.electronAPI
+      .getAdvice(7)
+      .then((rows) => {
         console.log("fetched rows: ", rows);
         setAdvices(rows);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Error in fetching the records");
-      })
-
-  }, [])
+      });
+  }, []);
   const contentRef = useRef(null);
 
   const handleDownloadPdf = async () => {
-
     const element = document.getElementById("invoice");
     if (!element) {
       console.error("Invoice element not found");
       return;
     }
 
-    const canvas = await html2canvas(element, { scale: 2, width: element.offsetWidth, height: element.offsetHeight });
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      width: element.offsetWidth,
+      height: element.offsetHeight,
+    });
     const imgData = canvas.toDataURL("image/png");
 
     // Create PDF
@@ -193,33 +221,32 @@ export default function PaymentAdviceForm() {
 
     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
     pdf.save("Payment_Advice_Custom.pdf");
-
-
   };
 
-
   const handleSubmitData = () => {
-    window.electronAPI.saveAdvice(invoiceData)
-      .then(id => {
-        console.log("Data Saved Successfully",id);
+    console.log(invoiceData);
+    window.electronAPI
+      .saveAdvice(invoiceData)
+      .then((id) => {
+        console.log("Data Saved Successfully");
       })
-      .catch(err => {
-        console.log(err.message);
-
-      })
-  }
+      .catch((err) => {
+        console.log("error");
+      });
+  };
 
   const handleDeleteData = () => {
-    window.electronAPI.deleteAdvices()
-      .then(count => {
+    window.electronAPI
+      .deleteAdvices()
+      .then((count) => {
         console.log(`Deleted ${count} records`);
-        return window.electronAPI.deleteAdvices();
+        return window.electronAPI.getAdvices();
       })
-      .then(rows => setAdvices(rows))
-      .catch(err => {
+      .then((rows) => setAdvices(rows))
+      .catch((err) => {
         console.error("Error deleting null records:", err);
       });
-  }
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800 font-sans select-none">
@@ -838,30 +865,36 @@ export default function PaymentAdviceForm() {
 
               <button
                 onClick={handleDeleteData}
-                className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs shadow transition">
+                className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs shadow transition"
+              >
                 <Trash2 className="w-4 h-4" /> Delete
               </button>
 
               <button
                 onClick={handleSubmitData}
-                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs shadow transition">
+                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs shadow transition"
+              >
                 <Save className="w-4 h-4" /> Save Record
               </button>
             </div>
           </footer>
         </div>
 
-        <div id="invoice" style={{
-          position: "absolute",
-          top: "-9999px",
-          left: "-9999px",
-          visibility: "visible"
-        }}>
+        <div
+          id="invoice"
+          style={{
+            position: "absolute",
+            top: "-9999px",
+            left: "-9999px",
+            visibility: "visible",
+          }}
+        >
           <div ref={contentRef}>
             <PrintableInvoice data={invoiceData} />
           </div>
         </div>
       </main>
+      <ToastContainer />
     </div>
   );
 }
