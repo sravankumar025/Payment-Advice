@@ -20,11 +20,13 @@ import shalimarLogo from "../Images/shalimarLogo.png";
 import PrintableInvoice from "./PrintableInvoice";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { useNavigate } from "react-router-dom";
 
 export default function PaymentAdviceForm() {
   // --- State Management ---
   const [currentTime, setCurrentTime] = useState(new Date());
   const [advice, setAdvices] = useState([]);
+  const navigate = useNavigate();
   // Header & Transaction Info
   const [formData, setFormData] = useState({
     location: "",
@@ -36,7 +38,7 @@ export default function PaymentAdviceForm() {
     refNo: "",
     outstandingBillNo: "",
     receivedDate: new Date().toISOString().split("T")[0],
-    paymentMode: "DD",
+    paymentMode: "",
     chqNo: "",
     chqDate: new Date().toISOString().split("T")[0],
     bankName: "",
@@ -154,23 +156,6 @@ export default function PaymentAdviceForm() {
     }
   };
 
-  /*Excel Export */
-  const handleExportExcel = () => {
-    const exportData = [
-      { Category: "Advice No", Value: formData.adviceNo },
-      { Category: "Party Name", Value: formData.partyName },
-      { Category: "Date", Value: formData.date },
-      { Category: "Total Item Amount", Value: totalItemAmount.toFixed(2) },
-      { Category: "Total Deductions", Value: totalDeductions.toFixed(2) },
-      { Category: "Net Amount Issued", Value: netAmountIssued.toFixed(2) },
-    ];
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Payment Advice");
-    XLSX.writeFile(workbook, `Payment_Advice_${formData.adviceNo}.xlsx`);
-  };
-
   /**PDF Export */
   const invoiceData = {
     ...formData,
@@ -184,20 +169,6 @@ export default function PaymentAdviceForm() {
     netAmountIssued,
   };
 
-  useEffect(() => {
-    console.log("FormData ", formData);
-    console.log("Deductions", deductions);
-
-    window.electronAPI
-      .getAdvice(7)
-      .then((rows) => {
-        console.log("fetched rows: ", rows);
-        setAdvices(rows);
-      })
-      .catch((err) => {
-        console.error("Error in fetching the records");
-      });
-  }, []);
   const contentRef = useRef(null);
 
   const handleDownloadPdf = async () => {
@@ -224,7 +195,6 @@ export default function PaymentAdviceForm() {
   };
 
   const handleSubmitData = () => {
-    console.log(invoiceData);
     window.electronAPI
       .saveAdvice(invoiceData)
       .then((id) => {
@@ -240,7 +210,6 @@ export default function PaymentAdviceForm() {
       .deleteAdvices()
       .then((count) => {
         console.log(`Deleted ${count} records`);
-        return window.electronAPI.getAdvices();
       })
       .then((rows) => setAdvices(rows))
       .catch((err) => {
@@ -267,11 +236,25 @@ export default function PaymentAdviceForm() {
           </p>
         </div>
 
-        <div className="mt-2 md:mt-0 text-right">
-          <div className="text-xs text-black">Current Session</div>
-          <div className="text-sm font-mono font-medium text-emerald-400">
-            {currentTime.toLocaleDateString()} |{" "}
-            {currentTime.toLocaleTimeString()}
+        <div className="flex justify-between mt-2 md:mt-0 text-right gap-3">
+          <div>
+            <div className="text-xs text-black">Current Session</div>
+            <div className="text-sm font-mono font-medium text-emerald-400">
+              {currentTime.toLocaleDateString("en-GB")} |{" "}
+              {currentTime.toLocaleTimeString()}
+            </div>
+          </div>
+          <div className="mt-0 cursor-pointer">
+            <svg
+              onClick={()=> navigate("/reports")}
+              xmlns="http://www.w3.org/2000/svg" width="34" height="34"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
           </div>
         </div>
       </header>
@@ -451,8 +434,8 @@ export default function PaymentAdviceForm() {
                   <option value="">Select</option>
                   <option value="DD">DD</option>
                   <option value="Cheque">Cheque</option>
-                  <option value="Cheque">RTGS</option>
-                  <option value="Cash">NEFT</option>
+                  <option value="RTGS">RTGS</option>
+                  <option value="NEFT">NEFT</option>
                 </select>
               </div>
 
