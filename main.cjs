@@ -3,11 +3,11 @@ const path = require("path");
 const isDev = require("electron-is-dev");
 const fs = require("fs");
 const Database = require("better-sqlite3");
-const db = new Database("payment_advice1.db");
+const db = new Database("payment_advice.db");
 
 let mainWindow;
 
-// --- Schema setup ---
+// Schema
 db.prepare(
   `
 CREATE TABLE IF NOT EXISTS advices (
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS qualityDiffs (
 )`,
 ).run();
 
-// --- Save advice handler ---
+// Save advice handler
 ipcMain.handle("save-advice", (event, formData) => {
   console.log("Incoming advice data:", formData);
   const requiredFields = ["partyName", "adviceNo", "location"];
@@ -81,7 +81,7 @@ ipcMain.handle("save-advice", (event, formData) => {
       `Cannot save advice. Missing required fields: ${missing.join(", ")}`
     );
     throw new Error("Validation failed");
-  }else {
+  } else {
     // If validation passes, show success info box
     dialog.showMessageBox({
       type: "info",
@@ -164,18 +164,18 @@ ipcMain.handle("save-advice", (event, formData) => {
   return adviceId;
 });
 
-// --- Get advice handler ---
-ipcMain.handle("get-advice", (event, adviceId) => {
+// Get advice handler
+ipcMain.handle("get-advice", () => {
   const advices = db.prepare("SELECT * FROM advices").all();
-  const advice = db.prepare("SELECT * FROM advices WHERE id = ?").get(adviceId);
-  const items = db
-    .prepare("SELECT * FROM items WHERE adviceId = ?")
-    .all(adviceId);
-  const qualityDiffs = db
-    .prepare("SELECT * FROM qualityDiffs WHERE adviceId = ?")
-    .all(adviceId);
+  const items = db.prepare("SELECT * FROM items").all();
+  const qualityDiffs = db.prepare("SELECT * FROM qualityDiffs").all();
 
-  return { ...advices, items, qualityDiffs };
+  const result= advices.map(advice => ({
+    ...advice,
+    items: items.filter(i => i.adviceId === advice.id),
+    qualityDiffs: qualityDiffs.filter(q => q.adviceId === advice.id)
+  }))
+  return result;
 });
 
 ipcMain.handle("delete-advices", () => {
@@ -201,11 +201,12 @@ ipcMain.handle("delete-advices", () => {
   }
 });
 
-// --- Window setup ---
+// Window setup
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    icon: path.join(__dirname, "src", "assets", "PA5.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
