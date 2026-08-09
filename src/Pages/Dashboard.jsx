@@ -27,150 +27,20 @@ const EyeIcon = () => (
     </svg>
 );
 
+const TrashIcon = () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+);
+
 const FilterResetIcon = () => (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
     </svg>
 );
 
-const WalletIcon = () => (
-    <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-    </svg>
-);
-
-const TrendingDownIcon = () => (
-    <svg className="w-6 h-6 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-    </svg>
-);
-
-const FileTextIcon = () => (
-    <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-);
-
-const TagIcon = () => (
-    <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-    </svg>
-);
-
-const SAMPLE_ADVICES = [
-    {
-        id: 1,
-        adviceNo: "PA-2026-001",
-        partyName: "Bhaskara Logistics & Mills",
-        location: "Hyderabad",
-        broker: "Srinivas Agencies",
-        accountNo: "ACC-908122",
-        date: "2026-08-01",
-        receivedDate: "2026-08-02",
-        paymentMode: "Cheque",
-        chqNo: "CHQ-889021",
-        bankName: "HDFC Bank",
-        cashDiscountAmount: 4500.0,
-        totalDeductions: 12800.0,
-        netAmountIssued: 683712.0,
-        totalItemAmount: 692012.0,
-        remarks: "Regular monthly clearance",
-        items: [
-            { id: 101, qty: "50", rate: "12000", netWeight: "600" },
-            { id: 102, qty: "20", rate: "4600", netWeight: "92" }
-        ],
-        qualityDiffs: [
-            { id: 201, qty: "2", uom: "Bags", rate: "2500", remarks: "Moisture penalty" }
-        ]
-    },
-    {
-        id: 2,
-        adviceNo: "PA-2026-002",
-        partyName: "Sri Venkateswara Traders",
-        location: "Vijayawada",
-        broker: "Rao & Sons",
-        accountNo: "ACC-552190",
-        date: "2026-08-03",
-        receivedDate: "2026-08-03",
-        paymentMode: "NEFT/RTGS",
-        chqNo: "N-9812451",
-        bankName: "State Bank of India",
-        cashDiscountAmount: 2200.0,
-        totalDeductions: 5400.0,
-        netAmountIssued: 312000.0,
-        totalItemAmount: 315200.0,
-        remarks: "Payment against invoice #4092",
-        items: [{ id: 103, qty: "25", rate: "12600", netWeight: "315" }],
-        qualityDiffs: []
-    },
-    {
-        id: 3,
-        adviceNo: "PA-2026-003",
-        partyName: "Global Agro Inputs Ltd",
-        location: "Guntur",
-        broker: "Direct",
-        accountNo: "ACC-110098",
-        date: "2026-08-04",
-        receivedDate: "2026-08-04",
-        paymentMode: "Cash",
-        chqNo: "-",
-        bankName: "-",
-        cashDiscountAmount: 1500.0,
-        totalDeductions: 3200.0,
-        netAmountIssued: 145000.0,
-        totalItemAmount: 146700.0,
-        remarks: "Hand cash payment for spot delivery",
-        items: [{ id: 104, qty: "10", rate: "14670", netWeight: "100" }],
-        qualityDiffs: []
-    },
-    {
-        id: 4,
-        adviceNo: "PA-2026-004",
-        partyName: "Royal Grain Processors",
-        location: "Kakinada",
-        broker: "Krishna Associates",
-        accountNo: "ACC-663211",
-        date: "2026-08-05",
-        receivedDate: "2026-08-05",
-        paymentMode: "Bank Transfer",
-        chqNo: "TXN-776212",
-        bankName: "ICICI Bank",
-        cashDiscountAmount: 6200.0,
-        totalDeductions: 18500.0,
-        netAmountIssued: 920500.0,
-        totalItemAmount: 932800.0,
-        remarks: "Bulk consignment 12",
-        items: [{ id: 105, qty: "80", rate: "11660", netWeight: "932.8" }],
-        qualityDiffs: [
-            { id: 202, qty: "5", uom: "MTS", rate: "2400", remarks: "Shortage adjustment" }
-        ]
-    },
-    {
-        id: 5,
-        adviceNo: "PA-2026-005",
-        partyName: "Balaji Agro Food Products",
-        location: "Hyderabad",
-        broker: "Srinivas Agencies",
-        accountNo: "ACC-908122",
-        date: "2026-08-06",
-        receivedDate: "2026-08-06",
-        paymentMode: "Cheque",
-        chqNo: "CHQ-990123",
-        bankName: "Axis Bank",
-        cashDiscountAmount: 3100.0,
-        totalDeductions: 8900.0,
-        netAmountIssued: 485000.0,
-        totalItemAmount: 490800.0,
-        remarks: "Urgent dispatch settlement",
-        items: [{ id: 106, qty: "40", rate: "12270", netWeight: "490.8" }],
-        qualityDiffs: []
-    }
-];
-
-
 export default function PaymentAdviceDashboard() {
-    const [advices, setAdvices] = useState(SAMPLE_ADVICES);
-    const [advice, setAdvice] = useState([]);
+    const [advices, setAdvices] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [paymentModeFilter, setPaymentModeFilter] = useState("ALL");
     const [fromDate, setFromDate] = useState("");
@@ -193,7 +63,7 @@ export default function PaymentAdviceDashboard() {
                         setAdvices(data);
                     }
                 } catch (error) {
-                    console.error("Failed to load records from SQLite:", error);
+                    console.error("Failed to load records from PostgreSQL:", error);
                 }
             }
         };
@@ -202,42 +72,48 @@ export default function PaymentAdviceDashboard() {
 
     const filteredAdvices = useMemo(() => {
         return advices.filter((item) => {
-            // 1. Text Search Filter (Party Name, Advice No, Location, Broker)
+            const partyName = item.partyname || item.partyName || "";
+            const adviceNo = item.adviceno || item.adviceNo || "";
+            const location = item.location || "";
+            const broker = item.broker || "";
+            const paymentMode = item.paymentmode || item.paymentMode || "";
+            const adviceDate = item.date || "";
+
+            // 1. Text Search Filter
             const matchesSearch =
                 searchTerm === "" ||
-                (item.partyName && item.partyName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                (item.adviceNo && item.adviceNo.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                (item.location && item.location.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                (item.broker && item.broker.toLowerCase().includes(searchTerm.toLowerCase()));
+                partyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                adviceNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                broker.toLowerCase().includes(searchTerm.toLowerCase());
 
             // 2. Payment Mode Filter
             const matchesMode =
                 paymentModeFilter === "ALL" ||
-                (item.paymentMode && item.paymentMode.toUpperCase() === paymentModeFilter.toUpperCase());
+                paymentMode.toUpperCase() === paymentModeFilter.toUpperCase();
 
-            // 3. Date Range Filter (FROM & TO)
+            // 3. Date Range Filter
             let matchesDate = true;
             if (fromDate) {
-                matchesDate = matchesDate && new Date(item.date) >= new Date(fromDate);
+                matchesDate = matchesDate && new Date(adviceDate) >= new Date(fromDate);
             }
             if (toDate) {
-                matchesDate = matchesDate && new Date(item.date) <= new Date(toDate);
+                matchesDate = matchesDate && new Date(adviceDate) <= new Date(toDate);
             }
 
             return matchesSearch && matchesMode && matchesDate;
         });
     }, [advices, searchTerm, paymentModeFilter, fromDate, toDate]);
 
-    // Reset pagination when filters change
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, paymentModeFilter, fromDate, toDate]);
 
     const metrics = useMemo(() => {
         const totalCount = filteredAdvices.length;
-        const totalNetIssued = filteredAdvices.reduce((acc, curr) => acc + (Number(curr.netAmountIssued) || 0), 0);
-        const totalDeductions = filteredAdvices.reduce((acc, curr) => acc + (Number(curr.totalDeductions) || 0), 0);
-        const totalCashDiscounts = filteredAdvices.reduce((acc, curr) => acc + (Number(curr.cashDiscountAmount) || 0), 0);
+        const totalNetIssued = filteredAdvices.reduce((acc, curr) => acc + (Number(curr.netamountissued || curr.netAmountIssued) || 0), 0);
+        const totalDeductions = filteredAdvices.reduce((acc, curr) => acc + (Number(curr.totaldeductions || curr.totalDeductions) || 0), 0);
+        const totalCashDiscounts = filteredAdvices.reduce((acc, curr) => acc + (Number(curr.cashdiscountamount || curr.cashDiscountAmount) || 0), 0);
 
         return { totalCount, totalNetIssued, totalDeductions, totalCashDiscounts };
     }, [filteredAdvices]);
@@ -255,6 +131,21 @@ export default function PaymentAdviceDashboard() {
         setToDate("");
     };
 
+    const handleDeleteAdvice = async (id, adviceNo) => {
+        const isConfirmed = window.confirm(`Are you sure you want to delete advice "${adviceNo || id}"?`);
+        if (!isConfirmed) return;
+
+        if (window.electronAPI && window.electronAPI.deleteAdvice) {
+            try {
+                await window.electronAPI.deleteAdvice(id);
+                setAdvices((prev) => prev.filter((item) => item.id !== id));
+            } catch (error) {
+                console.error("Failed to delete record:", error);
+                alert("Error deleting record from database.");
+            }
+        }
+    };
+
     const handleExportExcel = () => {
         if (filteredAdvices.length === 0) {
             alert("No data available to export!");
@@ -268,10 +159,18 @@ export default function PaymentAdviceDashboard() {
         ];
 
         const rows = filteredAdvices.map((a) => [
-            a.id, a.adviceNo, a.date, a.partyName, a.location, a.broker,
-            a.paymentMode, `${a.bankName} (${a.chqNo || "-"})`,
-            a.cashDiscountAmount || 0, a.totalDeductions || 0,
-            a.netAmountIssued || 0, a.remarks || ""
+            a.id,
+            a.adviceno || a.adviceNo,
+            a.date,
+            a.partyname || a.partyName,
+            a.location,
+            a.broker,
+            a.paymentmode || a.paymentMode,
+            `${a.bankname || a.bankName || ""} (${a.chqno || a.chqNo || "-"})`,
+            a.cashdiscountamount || a.cashDiscountAmount || 0,
+            a.totaldeductions || a.totalDeductions || 0,
+            a.netamountissued || a.netAmountIssued || 0,
+            a.remarks || ""
         ]);
 
         const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
@@ -301,6 +200,7 @@ export default function PaymentAdviceDashboard() {
                     <h1 className="text-xl font-bold tracking-wide">Reports & Dashboard</h1>
                 </div>
             </header>
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
@@ -317,9 +217,7 @@ export default function PaymentAdviceDashboard() {
                 </div>
             </div>
 
-            { }
-
-            { }
+            {/* Filter Section */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
@@ -336,7 +234,6 @@ export default function PaymentAdviceDashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Search Box */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-1">Search</label>
                         <div className="relative">
@@ -353,7 +250,6 @@ export default function PaymentAdviceDashboard() {
                         </div>
                     </div>
 
-                    {/* Payment Mode Selector */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-1">Payment Mode</label>
                         <select
@@ -370,7 +266,6 @@ export default function PaymentAdviceDashboard() {
                         </select>
                     </div>
 
-                    {/* FROM Date */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-1">From Date</label>
                         <div className="relative">
@@ -386,7 +281,6 @@ export default function PaymentAdviceDashboard() {
                         </div>
                     </div>
 
-                    {/* TO Date */}
                     <div>
                         <label className="block text-xs font-semibold text-slate-600 mb-1">To Date</label>
                         <div className="relative">
@@ -404,7 +298,7 @@ export default function PaymentAdviceDashboard() {
                 </div>
             </div>
 
-            { }
+            {/* Table Section */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
@@ -416,55 +310,72 @@ export default function PaymentAdviceDashboard() {
                                 <th className="py-3 px-4">Payment Mode</th>
                                 <th className="py-3 px-4 text-right">Deductions (₹)</th>
                                 <th className="py-3 px-4 text-right">Net Amount (₹)</th>
-                                <th className="py-3 px-4 text-center">Action</th>
+                                <th className="py-3 px-4 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
                             {paginatedAdvices.length > 0 ? (
-                                paginatedAdvices.map((advice) => (
-                                    <tr key={advice.id} className="hover:bg-slate-50/80 transition">
-                                        <td className="py-3.5 px-4">
-                                            <div className="font-bold text-indigo-600">{advice.adviceNo}</div>
-                                            <div className="text-[11px] text-slate-400 mt-0.5">{advice.date}</div>
-                                        </td>
-                                        <td className="py-3.5 px-4">
-                                            <div className="font-semibold text-slate-800">{advice.partyName}</div>
-                                            <div className="text-[11px] text-slate-500">{advice.location}</div>
-                                        </td>
-                                        <td className="py-3.5 px-4 font-medium text-slate-600">
-                                            {advice.broker || "-"}
-                                        </td>
-                                        <td className="py-3.5 px-4">
-                                            <span
-                                                className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${advice.paymentMode === "Cheque"
+                                paginatedAdvices.map((advice) => {
+                                    const adviceNo = advice.adviceno || advice.adviceNo;
+                                    const partyName = advice.partyname || advice.partyName;
+                                    const paymentMode = advice.paymentmode || advice.paymentMode;
+                                    const totalDeductions = advice.totaldeductions || advice.totalDeductions;
+                                    const netAmountIssued = advice.netamountissued || advice.netAmountIssued;
+
+                                    return (
+                                        <tr key={advice.id} className="hover:bg-slate-50/80 transition">
+                                            <td className="py-3.5 px-4">
+                                                <div className="font-bold text-indigo-600">{adviceNo}</div>
+                                                <div className="text-[11px] text-slate-400 mt-0.5">{advice.date}</div>
+                                            </td>
+                                            <td className="py-3.5 px-4">
+                                                <div className="font-semibold text-slate-800">{partyName}</div>
+                                                <div className="text-[11px] text-slate-500">{advice.location}</div>
+                                            </td>
+                                            <td className="py-3.5 px-4 font-medium text-slate-600">
+                                                {advice.broker || "-"}
+                                            </td>
+                                            <td className="py-3.5 px-4">
+                                                <span
+                                                    className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${paymentMode === "Cheque"
                                                         ? "bg-purple-100 text-purple-700"
-                                                        : advice.paymentMode === "NEFT/RTGS" || advice.paymentMode === "Bank Transfer"
+                                                        : paymentMode === "NEFT/RTGS" || paymentMode === "Bank Transfer"
                                                             ? "bg-blue-100 text-blue-700"
-                                                            : advice.paymentMode === "Cash"
+                                                            : paymentMode === "Cash"
                                                                 ? "bg-emerald-100 text-emerald-700"
                                                                 : "bg-slate-100 text-slate-700"
-                                                    }`}
-                                            >
-                                                {advice.paymentMode || "Standard"}
-                                            </span>
-                                        </td>
-                                        <td className="py-3.5 px-4 text-right font-medium text-rose-600">
-                                            ₹{Number(advice.totalDeductions || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                                        </td>
-                                        <td className="py-3.5 px-4 text-right font-black text-slate-900">
-                                            ₹{Number(advice.netAmountIssued || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                                        </td>
-                                        <td className="py-3.5 px-4 text-center">
-                                            <button
-                                                onClick={() => setSelectedAdvice(advice)}
-                                                className="p-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg text-slate-600 transition"
-                                                title="View Full Details"
-                                            >
-                                                <EyeIcon />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
+                                                        }`}
+                                                >
+                                                    {paymentMode || "Standard"}
+                                                </span>
+                                            </td>
+                                            <td className="py-3.5 px-4 text-right font-medium text-rose-600">
+                                                ₹{Number(totalDeductions || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                                            </td>
+                                            <td className="py-3.5 px-4 text-right font-black text-slate-900">
+                                                ₹{Number(netAmountIssued || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                                            </td>
+                                            <td className="py-3.5 px-4 text-center">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <button
+                                                        onClick={() => setSelectedAdvice(advice)}
+                                                        className="p-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg text-slate-600 transition"
+                                                        title="View Full Details"
+                                                    >
+                                                        <EyeIcon />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteAdvice(advice.id, adviceNo)}
+                                                        className="p-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 rounded-lg text-slate-600 transition"
+                                                        title="Delete Advice"
+                                                    >
+                                                        <TrashIcon />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             ) : (
                                 <tr>
                                     <td colSpan={7} className="py-12 text-center text-slate-400">
@@ -477,7 +388,7 @@ export default function PaymentAdviceDashboard() {
                     </table>
                 </div>
 
-                { }
+                {/* Pagination Controls */}
                 <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
                     <div className="flex items-center gap-2">
                         <span>Rows per page:</span>
@@ -522,18 +433,17 @@ export default function PaymentAdviceDashboard() {
                 </div>
             </div>
 
-            { }
+            {/* Modal */}
             {selectedAdvice && (
                 <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col">
-                        {/* Modal Header */}
                         <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
                             <div>
                                 <h3 className="text-lg font-bold text-slate-900">
-                                    Advice Details - {selectedAdvice.adviceNo}
+                                    Advice Details - {selectedAdvice.adviceno || selectedAdvice.adviceNo}
                                 </h3>
                                 <p className="text-xs text-slate-500">
-                                    Recorded on {selectedAdvice.date} | Party: {selectedAdvice.partyName}
+                                    Recorded on {selectedAdvice.date} | Party: {selectedAdvice.partyname || selectedAdvice.partyName}
                                 </p>
                             </div>
                             <button
@@ -544,9 +454,7 @@ export default function PaymentAdviceDashboard() {
                             </button>
                         </div>
 
-                        {/* Modal Body */}
                         <div className="p-6 overflow-y-auto space-y-6 text-xs text-slate-700">
-                            {/* Key Particulars Grid */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
                                 <div>
                                     <span className="text-slate-400 block text-[10px] uppercase font-bold">Broker</span>
@@ -558,19 +466,19 @@ export default function PaymentAdviceDashboard() {
                                 </div>
                                 <div>
                                     <span className="text-slate-400 block text-[10px] uppercase font-bold">Account No</span>
-                                    <span className="font-semibold text-slate-800">{selectedAdvice.accountNo || "N/A"}</span>
+                                    <span className="font-semibold text-slate-800">{selectedAdvice.accountno || selectedAdvice.accountNo || "N/A"}</span>
                                 </div>
                                 <div>
                                     <span className="text-slate-400 block text-[10px] uppercase font-bold">Payment Mode</span>
-                                    <span className="font-semibold text-indigo-600">{selectedAdvice.paymentMode || "N/A"}</span>
+                                    <span className="font-semibold text-indigo-600">{selectedAdvice.paymentmode || selectedAdvice.paymentMode || "N/A"}</span>
                                 </div>
                                 <div>
                                     <span className="text-slate-400 block text-[10px] uppercase font-bold">Bank Name</span>
-                                    <span className="font-semibold text-slate-800">{selectedAdvice.bankName || "N/A"}</span>
+                                    <span className="font-semibold text-slate-800">{selectedAdvice.bankname || selectedAdvice.bankName || "N/A"}</span>
                                 </div>
                                 <div>
                                     <span className="text-slate-400 block text-[10px] uppercase font-bold">Chq / Txn No</span>
-                                    <span className="font-semibold text-slate-800">{selectedAdvice.chqNo || "N/A"}</span>
+                                    <span className="font-semibold text-slate-800">{selectedAdvice.chqno || selectedAdvice.chqNo || "N/A"}</span>
                                 </div>
                             </div>
 
@@ -591,7 +499,7 @@ export default function PaymentAdviceDashboard() {
                                                 <tr key={index}>
                                                     <td className="p-2">{item.qty}</td>
                                                     <td className="p-2">₹{item.rate}</td>
-                                                    <td className="p-2">{item.netWeight}</td>
+                                                    <td className="p-2">{item.netweight || item.netWeight}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -628,7 +536,7 @@ export default function PaymentAdviceDashboard() {
                                 </div>
                             )}
 
-                            {/* Remarks Section */}
+                            {/* Remarks */}
                             {selectedAdvice.remarks && (
                                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900">
                                     <span className="font-bold block text-[10px] uppercase">Remarks / Notes:</span>
@@ -637,12 +545,11 @@ export default function PaymentAdviceDashboard() {
                             )}
                         </div>
 
-                        {/* Modal Footer */}
                         <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
                             <div>
                                 <span className="text-slate-500 font-semibold">Net Amount Issued:</span>
                                 <span className="ml-2 text-base font-black text-slate-900">
-                                    ₹{Number(selectedAdvice.netAmountIssued || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                                    ₹{Number(selectedAdvice.netamountissued || selectedAdvice.netAmountIssued || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                                 </span>
                             </div>
                             <button
