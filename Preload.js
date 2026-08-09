@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   savePdf: () => ipcRenderer.invoke("generate-pdf"),
   saveAdvice: (formData) => ipcRenderer.invoke("save-advice", formData),
   getAdvice: (id) => ipcRenderer.invoke("get-advice", id),
+  deleteAdvice: (id) => ipcRenderer.invoke("delete-advice", id),
   deleteAdvices: () => ipcRenderer.invoke("delete-advices"),
   onDownloadStatus: (callback) => {
     const subscription = (event, value) => callback(value);
