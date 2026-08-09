@@ -1,0 +1,116 @@
+Alright, let’s lay out the exact steps with commands so you can make your PostgreSQL PC act as the database server for all other PCs on your LAN. Since you’re developing on that same PC, you’ll use 127.0.0.1 locally, and other PCs will use your PC’s IPv4 address.
+
+🖥️ On the PostgreSQL PC (the server)
+Find your IPv4 address
+
+Windows:
+
+powershell
+ipconfig
+Look under your active network adapter → IPv4 Address (e.g., 192.168.1.10).
+
+Linux/macOS:
+
+bash
+ip addr show
+or
+
+bash
+ifconfig
+Edit postgresql.conf
+
+Location (Windows default): C:\Program Files\PostgreSQL\<version>\data\postgresql.conf
+
+Location (Linux): /etc/postgresql/<version>/main/postgresql.conf
+
+Find the line:
+
+conf
+#listen_addresses = 'localhost'
+Change it to:
+
+conf
+listen_addresses = '*'
+Edit pg_hba.conf
+
+Same folder as postgresql.conf.
+
+Add a line to allow LAN connections:
+
+Code
+host    all    all    192.168.1.0/24    md5
+Replace 192.168.1.0/24 with your LAN subnet. If unsure, use your PC’s IP with /32:
+
+Code
+host    all    all    192.168.1.10/32    md5
+Restart PostgreSQL
+
+Windows:
+
+powershell
+net stop postgresql-x64-14
+net start postgresql-x64-14
+(replace 14 with your version)
+
+Linux:
+
+bash
+sudo systemctl restart postgresql
+Create a database and user
+
+sql
+CREATE DATABASE payment_advice;
+CREATE USER appuser WITH PASSWORD 'strongpassword';
+GRANT ALL PRIVILEGES ON DATABASE payment_advice TO appuser;
+Open firewall port 5432
+
+Windows:
+
+powershell
+netsh advfirewall firewall add rule name="Postgres" dir=in action=allow protocol=TCP localport=5432
+Linux (UFW):
+
+bash
+sudo ufw allow 5432/tcp
+📂 In your Node.js/Electron project
+Install pg
+
+bash
+npm install pg
+Use environment variables
+
+Create .env:
+
+Code
+DB_HOST=192.168.1.10
+DB_PORT=5432
+DB_USER=appuser
+DB_PASS=strongpassword
+DB_NAME=payment_advice
+Load with dotenv:
+
+js
+require("dotenv").config();
+const { Pool } = require("pg");
+
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+});
+Local vs LAN
+
+On your PC (dev): use DB_HOST=127.0.0.1.
+
+On other PCs (clients): use DB_HOST=<your IPv4> (e.g., 192.168.1.10).
+
+🚀 Deployment summary
+Your PC runs PostgreSQL and acts as the server.
+
+Other PCs only need your app .exe.
+
+Your app connects to your PC’s IPv4 address (192.168.1.10) on port 5432.
+
+PostgreSQL config + firewall must allow LAN connections.
