@@ -1,9 +1,8 @@
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require("electron");
 const path = require("path");
 const isDev = require("electron-is-dev");
 const fs = require("fs");
 const { Pool } = require("pg");
-
 // Configure PostgreSQL connection pool
 const pool = new Pool({
   user: process.env.PGUSER || "postgres",
@@ -88,13 +87,13 @@ ipcMain.handle("save-advice", async (event, formData) => {
   console.log("Incoming advice data:", formData);
   const requiredFields = ["partyName", "adviceNo", "location"];
   const missing = requiredFields.filter(
-    (field) => !formData[field] || formData[field].trim() === ""
+    (field) => !formData[field] || formData[field].trim() === "",
   );
 
   if (missing.length > 0) {
     dialog.showErrorBox(
       "Validation Error",
-      `Cannot save advice. Missing required fields: ${missing.join(", ")}`
+      `Cannot save advice. Missing required fields: ${missing.join(", ")}`,
     );
     throw new Error("Validation failed");
   }
@@ -158,23 +157,23 @@ ipcMain.handle("save-advice", async (event, formData) => {
 
     // Insert items (skip empty rows)
     const validItems = formData.items.filter(
-      (i) => i.qty || i.rate || i.netWeight
+      (i) => i.qty || i.rate || i.netWeight,
     );
     for (const item of validItems) {
       await client.query(
         `INSERT INTO items (adviceId, qty, rate, netWeight) VALUES ($1, $2, $3, $4)`,
-        [adviceId, item.qty, item.rate, item.netWeight]
+        [adviceId, item.qty, item.rate, item.netWeight],
       );
     }
 
     // Insert quality diffs (skip empty rows)
     const validQualityDiffs = formData.qualityDiffs.filter(
-      (qd) => qd.qty || qd.rate || qd.remarks
+      (qd) => qd.qty || qd.rate || qd.remarks,
     );
     for (const qd of validQualityDiffs) {
       await client.query(
         `INSERT INTO qualityDiffs (adviceId, qty, uom, rate, remarks) VALUES ($1, $2, $3, $4, $5)`,
-        [adviceId, qd.qty, qd.uom, qd.rate, qd.remarks]
+        [adviceId, qd.qty, qd.uom, qd.rate, qd.remarks],
       );
     }
 
@@ -201,7 +200,9 @@ ipcMain.handle("save-advice", async (event, formData) => {
 // --- Get Advice Handler ---
 ipcMain.handle("get-advice", async () => {
   try {
-    const advicesRes = await pool.query("SELECT * FROM advices ORDER BY id DESC");
+    const advicesRes = await pool.query(
+      "SELECT * FROM advices ORDER BY id DESC",
+    );
     const itemsRes = await pool.query("SELECT * FROM items");
     const qualityDiffsRes = await pool.query("SELECT * FROM qualityDiffs");
 
@@ -212,8 +213,12 @@ ipcMain.handle("get-advice", async () => {
     // Map through each advice and nest its corresponding items & qualityDiffs
     const result = advices.map((advice) => ({
       ...advice,
-      items: items.filter((i) => i.adviceid === advice.id || i.adviceId === advice.id),
-      qualityDiffs: qualityDiffs.filter((q) => q.adviceid === advice.id || q.adviceId === advice.id),
+      items: items.filter(
+        (i) => i.adviceid === advice.id || i.adviceId === advice.id,
+      ),
+      qualityDiffs: qualityDiffs.filter(
+        (q) => q.adviceid === advice.id || q.adviceId === advice.id,
+      ),
     }));
 
     return result; // Returns an Array of advice objects directly
@@ -231,7 +236,9 @@ ipcMain.handle("delete-advice", async (event, id) => {
 
     // Deleting single advice record.
     // FK CASCADE constraints will handle linked items and qualityDiffs automatically.
-    const result = await client.query("DELETE FROM advices WHERE id = $1", [id]);
+    const result = await client.query("DELETE FROM advices WHERE id = $1", [
+      id,
+    ]);
 
     await client.query("COMMIT");
 
@@ -309,7 +316,7 @@ function createWindow() {
           });
         }
       });
-    }
+    },
   );
 
   const startUrl = isDev
@@ -317,9 +324,88 @@ function createWindow() {
     : `file://${path.join(__dirname, "../build/index.html")}`;
 
   mainWindow.loadURL(startUrl);
+  const menuTemplate = [
+    {
+      label: "File",
+      submenu: [
+        { label: "Master Entry", click: () => openMasterEntryWindow() },
+        { type: "separator" },
+        { role: "quit" },
+      ],
+    },
+    {
+      label: "Edit",
+      submenu: [
+        { role: "undo" },
+        { role: "redo" },
+        { type: "separator" },
+        { role: "cut" },
+        { role: "copy" },
+        { role: "paste" },
+        { role: "selectAll" },
+      ],
+    },
+    {
+      label: "View",
+      submenu: [
+        { role: "reload" },
+        { role: "toggleDevTools" },
+        { type: "separator" },
+        { role: "resetZoom" },
+        { role: "zoomIn" },
+        { role: "zoomOut" },
+        { role: "togglefullscreen" },
+      ],
+    },
+    {
+      label: "Window",
+      submenu: [{ role: "minimize" }, { role: "close" }],
+    },
+    {
+      label: "Help",
+      submenu: [
+        {
+          label: "About",
+          click: () => {
+            dialog.showMessageBox({
+              type: "info",
+              title: "About",
+              message: "Payment Advice App v1.0",
+            });
+          },
+        },
+      ],
+    },
+  ];
+  const menu = Menu.buildFromTemplate(menuTemplate);
+  Menu.setApplicationMenu(menu);
 }
 
 app.whenReady().then(createWindow);
+function openMasterEntryWindow() {
+  const masterWindow = new BrowserWindow({
+    width: 450,
+    height: 550,
+    parent: mainWindow,
+    modal: true,
+    frame: true,          // removes title bar & menus
+    resizable: false,      // prevents resizing
+    minimizable: false,
+    maximizable: false,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  });
+   
+   masterWindow.setMenu(null);
+  const masterUrl = isDev
+    ? "http://localhost:5173/master-entry"
+    : `file://${path.join(__dirname, "../build/index.html")}/master-entry`;
+
+  masterWindow.loadURL(masterUrl);
+}
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
