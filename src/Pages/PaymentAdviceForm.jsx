@@ -26,6 +26,7 @@ export default function PaymentAdviceForm() {
   // --- State Management ---
   const [currentTime, setCurrentTime] = useState(new Date());
   const [advice, setAdvices] = useState([]);
+  const [totalBag, setTotalBag] = useState(0);
   const navigate = useNavigate();
   // Header & Transaction Info
   const [formData, setFormData] = useState({
@@ -113,6 +114,9 @@ export default function PaymentAdviceForm() {
 
   const calculateItemAmount = (qty, rate) =>
     (parseFloat(qty) || 0) * (parseFloat(rate) || 0);
+
+  const calculateNetAmount = (amount, netWeight) =>
+    (parseFloat(amount) || 0) - (parseFloat(netWeight) || 0);
 
   const totalItemAmount = items.reduce(
     (acc, curr) => acc + calculateItemAmount(curr.qty, curr.rate),
@@ -246,7 +250,7 @@ export default function PaymentAdviceForm() {
           </div>
           <div className="mt-0 cursor-pointer">
             <svg
-              onClick={()=> navigate("/reports")}
+              onClick={() => navigate("/reports")}
               xmlns="http://www.w3.org/2000/svg" width="34" height="34"
               viewBox="0 0 24 24" fill="none" stroke="currentColor"
               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -505,13 +509,26 @@ export default function PaymentAdviceForm() {
                 {/* Item Entry Table */}
                 <div className="border border-slate-200 rounded-lg overflow-hidden">
                   <div className="bg-slate-100 px-4 py-2 border-b border-slate-200 flex justify-between items-center">
+
                     <span className="text-xs font-bold uppercase text-slate-600 tracking-wider">
                       Bill Item Breakdown
                     </span>
-                    <span className="text-xs font-medium text-slate-500">
-                      Total Bags:{" "}
-                      <strong className="text-indigo-600">{totalBags}</strong>
-                    </span>
+                    <div className="flex justify-between">
+                      <div>
+                        <span className="text-xs font-medium text-slate-500 p-2">
+                          Total Bills:
+                        </span>
+                        <input type="text" className="w-14 border rounded-lg text-right p-1" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-medium text-slate-500 p-2">
+                          Total Bags:
+                        </span>
+                        <input
+                          onChange={(e) => setTotalBag(e.target.value)}
+                          type="text" className="w-14 border rounded-lg text-right p-1 font-sm" />
+                      </div>
+                    </div>
                   </div>
                   <table className="w-full text-left text-xs">
                     <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
@@ -527,6 +544,7 @@ export default function PaymentAdviceForm() {
                     <tbody>
                       {items.map((row, idx) => {
                         const amount = calculateItemAmount(row.qty, row.rate);
+                        const calcuateNet = calculateNetAmount(amount, row.netWeight);
                         return (
                           <tr
                             key={idx}
@@ -556,7 +574,7 @@ export default function PaymentAdviceForm() {
                               />
                             </td>
                             <td className="p-2 border-r bg-amber-50 font-semibold text-right text-amber-900">
-                              {amount.toFixed(2)}
+                              {Math.round(amount).toFixed(2)}
                             </td>
                             <td className="p-1 border-r">
                               <input
@@ -573,7 +591,7 @@ export default function PaymentAdviceForm() {
                               />
                             </td>
                             <td className="p-2 bg-amber-50 font-semibold text-right text-amber-900">
-                              {amount.toFixed(2)}
+                              {Math.round(calcuateNet).toFixed(2)}
                             </td>
                           </tr>
                         );
@@ -588,11 +606,11 @@ export default function PaymentAdviceForm() {
                           Total Item Amount:
                         </td>
                         <td className="p-2 border-r text-right bg-amber-100 text-amber-900">
-                          {totalItemAmount.toFixed(2)}
+                          {Math.round(totalItemAmount).toFixed(2)}
                         </td>
                         <td className="p-2 border-r"></td>
                         <td className="p-2 text-right bg-amber-100 text-amber-900">
-                          {totalItemAmount.toFixed(2)}
+                          {Math.round(totalItemAmount).toFixed(2)}
                         </td>
                       </tr>
                     </tfoot>
@@ -651,7 +669,6 @@ export default function PaymentAdviceForm() {
                                 className="w-full px-1 py-1 border border-slate-200 rounded bg-white"
                               >
                                 <option value="Bags">Bags</option>
-                                <option value="Kg">Kg</option>
                                 <option value="Qtl">Qtl</option>
                               </select>
                             </td>
@@ -721,9 +738,25 @@ export default function PaymentAdviceForm() {
                         />
                       </div>
                     </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-slate-600">Unloading</span>
+                      <div className="flex items-center gap-1 w-32">
+                        <input
+                          type="text"
+                          readOnly
+                          value={totalBag*5}
+                          onChange={(e) =>
+                            setDeductions({
+                              ...deductions,
+                              unloading: e.target.value,
+                            })
+                          }
+                          className="w-full px-2 py-1 border border-slate-300 font-semibold text-right rounded"
+                        />
+                      </div>
+                    </div>
 
                     {[
-                      "Unloading",
                       "Cash Paid",
                       "Shortage",
                       "Late Loading",
@@ -751,6 +784,7 @@ export default function PaymentAdviceForm() {
                             }
                             className="w-32 px-2 py-1 border border-slate-300 rounded text-right focus:outline-indigo-500"
                           />
+
                         </div>
                       );
                     })}
@@ -842,7 +876,9 @@ export default function PaymentAdviceForm() {
                 <Printer className="w-4 h-4" /> Print PDF
               </button>
 
-              <button className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg text-xs transition">
+              <button
+                onClick={() => navigate("/reports")}
+                className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg text-xs transition">
                 <Search className="w-4 h-4" /> Search
               </button>
 
