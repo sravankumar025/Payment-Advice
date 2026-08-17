@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
-import RtgsTransactionReports from "./RtgsTransaction";
+import RtgsTransactionReports from "./RtgsTransactionReports";
+import DeductionsReport from "./DeductionsReports";
 const SearchIcon = () => (
   <svg
     className="w-4 h-4 text-slate-400"
@@ -555,7 +556,7 @@ export default function PaymentAdviceDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex font-sans text-slate-800 relative w-full overflow-x-hidden">
+    <div className="h-screen bg-slate-100 flex font-sans text-slate-800 relative w-full overflow-hidden">
       {/* BACKDROP OVERLAY WHEN SIDEBAR IS OPEN */}
       {isSidebarOpen && (
         <div
@@ -567,8 +568,9 @@ export default function PaymentAdviceDashboard() {
 
       {/* OVERLAY COLLAPSIBLE SIDEBAR */}
       <aside
-        className={`fixed top-0 left-0 h-full bg-slate-900 text-slate-300 transition-all duration-300 ease-in-out flex flex-col z-40 shadow-2xl ${isSidebarOpen ? "w-64" : "w-12"
-          }`}
+        className={`fixed top-0 left-0 h-full bg-slate-900 text-slate-300 transition-all duration-300 ease-in-out flex flex-col z-40 shadow-2xl ${
+          isSidebarOpen ? "w-64" : "w-12"
+        }`}
       >
         {/* Sidebar Header */}
         <div className="h-16 flex items-center justify-between px-3 border-b border-slate-800 bg-slate-950/50">
@@ -580,8 +582,9 @@ export default function PaymentAdviceDashboard() {
 
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`p-2 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg transition ${!isSidebarOpen ? "hidden md:block" : ""
-              }`}
+            className={`p-2 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg transition ${
+              !isSidebarOpen ? "hidden md:block" : ""
+            }`}
             title={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
           >
             {isSidebarOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
@@ -607,10 +610,11 @@ export default function PaymentAdviceDashboard() {
                     setIsSidebarOpen(false);
                   }
                 }}
-                className={`w-full flex items-center gap-3 px-1.5 py-2 rounded-xl font-medium text-xs transition group relative ${isActive
+                className={`w-full flex items-center gap-3 px-1.5 py-2 rounded-xl font-medium text-xs transition group relative ${
+                  isActive
                     ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
                     : "hover:bg-slate-800 text-slate-400 hover:text-white"
-                  }`}
+                }`}
               >
                 <div
                   className={`shrink-0 ${isActive ? "text-white" : "text-slate-400 group-hover:text-white"}`}
@@ -663,11 +667,10 @@ export default function PaymentAdviceDashboard() {
       </aside>
 
       {/* MAIN CONTENT AREA WITH FIXED LEFT MARGIN SO CONTENT NEVER COMPRESSES */}
-      <div className="flex-1 flex flex-col min-w-0 max-w-full overflow-x-hidden ml-16">
+      <div className="flex-1 flex flex-col h-full min-w-0 max-w-full overflow-hidden ml-16">
         {/* Header */}
         <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm sticky top-0 z-20">
           <div className="flex items-center space-x-3">
-
             <div className="flex items-center space-x-2">
               <DashboardIcon />
               <span
@@ -685,13 +688,15 @@ export default function PaymentAdviceDashboard() {
         </header>
 
         {/* Main Body Content */}
-        <main className="p-4 sm:p-6 space-y-6 flex-1 overflow-y-auto max-w-full">
+        <main className="p-4 sm:p-6 flex-1 overflow-y-auto max-w-full">
           {activeView !== "dashboard" ? (
             <div className="w-full min-h-[500px] bg-white rounded-2xl border border-dashed border-slate-300 shadow-sm flex flex-col p-8 text-center text-slate-400">
               <div className="flex-1 w-full h-full overflow-auto text-sm font-semibold text-slate-600 capitalize">
-                {activeView === "rtgs"
-                  ? <RtgsTransactionReports />
-                  : "Deductions & Discount Reports"}
+                {activeView === "rtgs" ? (
+                  <RtgsTransactionReports />
+                ) : (
+                  <DeductionsReport />
+                )}
               </div>
             </div>
           ) : (
@@ -725,13 +730,13 @@ export default function PaymentAdviceDashboard() {
                     paymentModeFilter !== "ALL" ||
                     fromDate ||
                     toDate) && (
-                      <button
-                        onClick={handleResetFilters}
-                        className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 transition"
-                      >
-                        <FilterResetIcon /> Clear Filters
-                      </button>
-                    )}
+                    <button
+                      onClick={handleResetFilters}
+                      className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 transition"
+                    >
+                      <FilterResetIcon /> Clear Filters
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -859,21 +864,22 @@ export default function PaymentAdviceDashboard() {
                               </td>
                               <td className="py-3.5 px-4">
                                 <span
-                                  className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${paymentMode === "Cheque"
+                                  className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
+                                    paymentMode === "Cheque"
                                       ? "bg-purple-100 text-purple-700"
                                       : [
-                                        "RTGS",
-                                        "NEFT",
-                                        "NEFT/RTGS",
-                                        "BANK TRANSFER",
-                                      ].includes(
-                                        (paymentMode || "").toUpperCase(),
-                                      )
+                                            "RTGS",
+                                            "NEFT",
+                                            "NEFT/RTGS",
+                                            "BANK TRANSFER",
+                                          ].includes(
+                                            (paymentMode || "").toUpperCase(),
+                                          )
                                         ? "bg-blue-100 text-blue-700"
                                         : paymentMode === "Cash"
                                           ? "bg-emerald-100 text-emerald-700"
                                           : "bg-slate-100 text-slate-700"
-                                    }`}
+                                  }`}
                                 >
                                   {paymentMode || "Standard"}
                                 </span>
@@ -1143,8 +1149,8 @@ export default function PaymentAdviceDashboard() {
                   ₹
                   {Number(
                     selectedAdvice.netamountissued ||
-                    selectedAdvice.netAmountIssued ||
-                    0,
+                      selectedAdvice.netAmountIssued ||
+                      0,
                   ).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                 </span>
               </div>
