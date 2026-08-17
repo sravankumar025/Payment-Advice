@@ -1,0 +1,399 @@
+import React, { useState, useEffect, useMemo } from "react";
+import * as XLSX from "xlsx";
+
+const SearchIcon = () => (
+  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  </svg>
+);
+
+const DownloadIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+  </svg>
+);
+
+const PrintIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+  </svg>
+);
+
+const PlusIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+  </svg>
+);
+
+const INITIAL_RTGS_TRANSACTIONS = [
+  {
+    sNo: 1,
+    partyName: "SHREE SHETKI BHANDAR",
+    station: "HINGOLI",
+    acctNo: "544101010050211",
+    ifscCode: "UBIN0554413",
+    amount: 2696148323.0,
+    chqNo: "",
+    date: "2026-08-14"
+  },
+  {
+    sNo: 2,
+    partyName: "AZIZ TRADERS",
+    station: "GUDIHATHNOOR",
+    acctNo: "60286390937",
+    ifscCode: "MAHB0000494",
+    amount: 281732.0,
+    chqNo: "",
+    date: "2026-08-14"
+  },
+  {
+    sNo: 3,
+    partyName: "NEW SAIKRUPA TRADING COMPANY",
+    station: "SARKHANI",
+    acctNo: "08174000109",
+    ifscCode: "HDFC0CBLMSB",
+    amount: 879489.0,
+    chqNo: "",
+    date: "2026-08-14"
+  },
+  {
+    sNo: 4,
+    partyName: "SHREE RAMDWARKA FARMER PRODUCER COMPANY LTD.",
+    station: "HADGAON",
+    acctNo: "925030036180115",
+    ifscCode: "UTIB0006031",
+    amount: 623916.0,
+    chqNo: "",
+    date: "2026-08-14"
+  },
+  {
+    sNo: 5,
+    partyName: "BALAJI AGRO ENTERPRISES",
+    station: "NANDED",
+    acctNo: "33190822104",
+    ifscCode: "SBIN0000432",
+    amount: 412500.0,
+    chqNo: "RTGS-9812",
+    date: "2026-08-15"
+  },
+   {
+    sNo: 6,
+    partyName: "SHREE RAMDWARKA FARMER PRODUCER COMPANY LTD.",
+    station: "HADGAON",
+    acctNo: "925030036180115",
+    ifscCode: "UTIB0006031",
+    amount: 623916.0,
+    chqNo: "",
+    date: "2026-08-14"
+  },
+  {
+    sNo: 7,
+    partyName: "BALAJI AGRO ENTERPRISES",
+    station: "NANDED",
+    acctNo: "33190822104",
+    ifscCode: "SBIN0000432",
+    amount: 412500.0,
+    chqNo: "RTGS-9812",
+    date: "2026-08-14"
+  },
+   {
+    sNo: 8,
+    partyName: "SHREE RAMDWARKA FARMER PRODUCER COMPANY LTD.",
+    station: "HADGAON",
+    acctNo: "925030036180115",
+    ifscCode: "UTIB0006031",
+    amount: 623916.0,
+    chqNo: "",
+    date: "2026-08-14"
+  },
+  {
+    sNo: 9,
+    partyName: "BALAJI AGRO ENTERPRISES",
+    station: "NANDED",
+    acctNo: "33190822104",
+    ifscCode: "SBIN0000432",
+    amount: 412500.0,
+    chqNo: "RTGS-9812",
+    date: "2026-08-14"
+  },
+   {
+    sNo: 10,
+    partyName: "SHREE RAMDWARKA FARMER PRODUCER COMPANY LTD.",
+    station: "HADGAON",
+    acctNo: "925030036180115",
+    ifscCode: "UTIB0006031",
+    amount: 623916.0,
+    chqNo: "",
+    date: "2026-08-14"
+  },
+  {
+    sNo: 11,
+    partyName: "BALAJI AGRO ENTERPRISES",
+    station: "NANDED",
+    acctNo: "33190822104",
+    ifscCode: "SBIN0000432",
+    amount: 412500.0,
+    chqNo: "RTGS-9812",
+    date: "2026-08-14"
+  }
+];
+
+export default function RtgsTransactionReports() {
+  const [transactions, setTransactions] = useState(INITIAL_RTGS_TRANSACTIONS);
+  const [selectedDate, setSelectedDate] = useState("2026-08-14");
+  const [sNoFrom, setSNoFrom] = useState("");
+  const [sNoTo, setSNoTo] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [notification, setNotification] = useState(null);
+
+  // Form State for Adding New Transaction
+  const [newParty, setNewParty] = useState({
+    partyName: "",
+    station: "",
+    acctNo: "",
+    ifscCode: "",
+    amount: "",
+    chqNo: "",
+    date: "2026-08-14"
+  });
+
+  const [currentTime, setCurrentTime] = useState("");
+
+  const showNotification = (msg, type = "info") => {
+    setNotification({ msg, type });
+    setTimeout(() => setNotification(null), 3500);
+  };
+
+  const filteredData = useMemo(() => {
+    return transactions.filter((item) => {
+      const matchesDate = !selectedDate || item.date === selectedDate;
+
+      const fromVal = sNoFrom !== "" ? parseInt(sNoFrom, 10) : null;
+      const toVal = sNoTo !== "" ? parseInt(sNoTo, 10) : null;
+      let matchesSNo = true;
+      if (fromVal !== null) matchesSNo = matchesSNo && item.sNo >= fromVal;
+      if (toVal !== null) matchesSNo = matchesSNo && item.sNo <= toVal;
+
+      const matchesSearch =
+        searchTerm === "" ||
+        item.partyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.station.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.acctNo.includes(searchTerm) ||
+        item.ifscCode.toLowerCase().includes(searchTerm.toLowerCase());
+
+      return matchesDate && matchesSNo && matchesSearch;
+    });
+  }, [transactions, selectedDate, sNoFrom, sNoTo, searchTerm]);
+
+  const totalAmount = useMemo(() => {
+    return filteredData.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+  }, [filteredData]);
+
+  const handleReset = () => {
+    setSelectedDate("2026-08-14");
+    setSNoFrom("");
+    setSNoTo("");
+    setSearchTerm("");
+    showNotification("Filters reset to default.");
+  };
+
+  const handleTransferToExcel = () => {
+    if (filteredData.length === 0) {
+      showNotification("No data available to export!", "warning");
+      return;
+    }
+
+    const headers = ["S.No.", "Name of Party", "Station", "Acct. No.", "IFSC Code", "Amount (₹)", "Chq No"];
+    const rows = filteredData.map((t) => [
+      t.sNo,
+      `"${t.partyName}"`,
+      `"${t.station}"`,
+      `"${t.acctNo}"`,
+      `"${t.ifscCode}"`,
+      t.amount.toFixed(2),
+      `"${t.chqNo || ""}"`
+    ]);
+
+    rows.push(["", "Total Amount", "", "", "", totalAmount.toFixed(2), ""]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `RTGS_Transaction_Report_${selectedDate || "all"}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showNotification("Excel CSV report generated and downloaded.");
+  };
+
+  const handleAddTransaction = (e) => {
+    e.preventDefault();
+    if (!newParty.partyName || !newParty.acctNo || !newParty.amount) {
+      showNotification("Please fill required fields (Party Name, Account No, Amount)", "warning");
+      return;
+    }
+
+    const newItem = {
+      sNo: transactions.length + 1,
+      partyName: newParty.partyName.toUpperCase(),
+      station: (newParty.station || "MAIN").toUpperCase(),
+      acctNo: newParty.acctNo,
+      ifscCode: (newParty.ifscCode || "SBIN000000").toUpperCase(),
+      amount: parseFloat(newParty.amount) || 0,
+      chqNo: newParty.chqNo,
+      date: newParty.date || selectedDate
+    };
+
+    setTransactions([...transactions, newItem]);
+    setIsAddModalOpen(false);
+    setNewParty({ partyName: "", station: "", acctNo: "", ifscCode: "", amount: "", chqNo: "", date: "2026-08-14" });
+    showNotification("New RTGS Transaction entry added successfully!");
+  };
+
+  return (
+    <div>
+      {notification && (
+        <div className="fixed top-4 right-4 z-50 px-4 py-2.5 rounded-xl shadow-lg bg-slate-900 text-white text-xs font-semibold flex items-center gap-2 animate-bounce">
+          <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+          {notification.msg}
+        </div>
+      )}
+
+      {}
+      <div className="bg-white px-6 py-3 flex items-center justify-between shrink-0 shadow-xs">
+        <div className="text-center">
+          <h2 className="text-xl font-black text-slate-900 tracking-tight">RTGS Transaction Report</h2>
+        </div>
+      </div>
+
+      {}
+      <div className="bg-slate-200/90 border-b rounded-xl px-7 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0 shadow-xs">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label className="font-semibold text-slate-700">Select Date</label>
+            <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+          </div>
+
+          <div className="h-4 w-px bg-slate-400 hidden sm:block"></div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold text-slate-700">SNo From</span>
+            <input
+              type="number"
+              value={sNoFrom}
+              onChange={(e) => setSNoFrom(e.target.value)}
+              className="w-14 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-center focus:outline-none focus:ring-1 focus:ring-slate-500"
+              placeholder="1"
+            />
+            <span className="font-semibold text-slate-700">To</span>
+            <input
+              type="number"
+              value={sNoTo}
+              onChange={(e) => setSNoTo(e.target.value)}
+              className="w-14 px-2 py-1 bg-white border border-slate-300 rounded text-xs text-center focus:outline-none focus:ring-1 focus:ring-slate-500"
+              placeholder="99"
+            />
+          </div>
+
+          <div className="h-4 w-px bg-slate-400 hidden md:block"></div>
+
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search Party, Station, Account..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-7 pr-3 py-1.5 bg-white border border-slate-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-slate-500 w-52"
+            />
+            <div className="absolute left-2 top-2">
+              <SearchIcon />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Command Action Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => showNotification("Refreshed report data.")}
+            className="px-3 py-1.5 bg-slate-100 border border-slate-300 hover:bg-white text-slate-800 font-semibold rounded text-xs shadow-xs transition"
+          >
+            Show
+          </button>
+          <button
+            className="px-3 py-1.5 bg-slate-100 border border-slate-300 hover:bg-white text-slate-800 font-semibold rounded text-xs shadow-xs flex items-center gap-1 transition"
+          >
+            <PrintIcon /> Print
+          </button>
+          <button
+            onClick={handleTransferToExcel}
+            className="px-3 py-1.5 bg-slate-100 border border-slate-300 hover:bg-white text-slate-800 font-semibold rounded text-xs shadow-xs flex items-center gap-1 transition"
+          >
+            <DownloadIcon /> Transfer to Excel...
+          </button>
+          <button
+            onClick={handleReset}
+            className="px-3 py-1.5 bg-slate-100 border border-slate-300 hover:bg-white text-slate-800 font-semibold rounded text-xs shadow-xs transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      {}
+      <div className="flex-1 p-4 flex flex-col overflow-hidden">
+        <div className="flex-1 bg-white border border-slate-300 rounded shadow-sm overflow-auto flex flex-col justify-between">
+          <table className="w-full text-left border-collapse min-w-[800px]">
+            <thead className="sticky top-0 bg-slate-100 border-b border-slate-300 text-xs font-bold text-slate-700 shadow-xs z-10">
+              <tr>
+                <th className="py-2 px-3 border-r border-slate-300 text-center w-16">S.No.</th>
+                <th className="py-2 px-3 border-r border-slate-300">Name of Party</th>
+                <th className="py-2 px-3 border-r border-slate-300">Station</th>
+                <th className="py-2 px-3 border-r border-slate-300 font-mono">Acct. No.</th>
+                <th className="py-2 px-3 border-r border-slate-300 font-mono">IFSC Code</th>
+                <th className="py-2 px-3 border-r border-slate-300 text-right">Amount</th>
+                <th className="py-2 px-3">Chq No</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 text-xs font-medium text-slate-800">
+              {filteredData.length > 0 ? (
+                filteredData.map((row) => (
+                  <tr key={row.sNo} className="hover:bg-slate-50 transition">
+                    <td className="py-2 px-3 border-r border-slate-200 text-center">{row.sNo}</td>
+                    <td className="py-2 px-3 border-r border-slate-200 font-semibold uppercase">{row.partyName}</td>
+                    <td className="py-2 px-3 border-r border-slate-200 uppercase">{row.station}</td>
+                    <td className="py-2 px-3 border-r border-slate-200 font-mono text-slate-700">{row.acctNo}</td>
+                    <td className="py-2 px-3 border-r border-slate-200 font-mono text-slate-700">{row.ifscCode}</td>
+                    <td className="py-2 px-3 border-r border-slate-200 text-right font-mono font-bold text-slate-900">
+                      {row.amount.toFixed(2)}
+                    </td>
+                    <td className="py-2 px-3 text-slate-500 font-mono">{row.chqNo || "-"}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                    No RTGS transaction records match the selected date or filter criteria.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {}
+          <div className="sticky bottom-0 bg-slate-100 border-t border-slate-300 p-2.5 flex items-center justify-end gap-3 z-10">
+            <span className="font-bold text-xs text-slate-700">Total Amount</span>
+            <div className="bg-yellow-100 border border-slate-300 px-4 py-1.5 rounded font-mono font-black text-sm text-slate-900 shadow-inner">
+              {totalAmount.toFixed(2)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
