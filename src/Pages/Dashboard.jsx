@@ -649,7 +649,7 @@ export default function PaymentAdviceDashboard() {
               <button
                 onClick={() =>
                   alert(
-                    "Future Report Section",
+                    "Future Report Section - You can easily add more routes here!",
                   )
                 }
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 border border-dashed border-slate-800 transition"
@@ -663,12 +663,12 @@ export default function PaymentAdviceDashboard() {
       </aside>
 
       {/* MAIN CONTENT AREA WITH FIXED LEFT MARGIN SO CONTENT NEVER COMPRESSES */}
-      <div className="flex-1 flex flex-col min-w-0 max-w-full ml-16">
+      <div className="flex-1 flex flex-col min-w-0 max-w-full overflow-x-hidden ml-16">
         {/* Header */}
         <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 sm:px-6 shadow-sm sticky top-0 z-20">
           <div className="flex items-center space-x-3">
 
-            <div className="flex items-center space-x-2" onClick={() => navigate("/")}>
+            <div className="flex items-center space-x-2">
               <DashboardIcon />
               <span
                 onClick={() => navigate("/")}
@@ -685,10 +685,10 @@ export default function PaymentAdviceDashboard() {
         </header>
 
         {/* Main Body Content */}
-        <main className="p-4 sm:p-6 space-y-6 flex-1 max-w-full">
+        <main className="p-4 sm:p-6 space-y-6 flex-1 overflow-y-auto max-w-full">
           {activeView !== "dashboard" ? (
-            <div className="w-full min-h-[calc(100vh-150px)] bg-white rounded-2xl border border-dashed border-slate-300 shadow-sm flex flex-col p-8 text-center text-slate-400">
-              <div className="flex-1 w-full overflow-auto text-sm font-semibold text-slate-600 capitalize">
+            <div className="w-full min-h-[500px] bg-white rounded-2xl border border-dashed border-slate-300 shadow-sm flex flex-col p-8 text-center text-slate-400">
+              <div className="flex-1 w-full h-full overflow-auto text-sm font-semibold text-slate-600 capitalize">
                 {activeView === "rtgs"
                   ? <RtgsTransactionReports />
                   : "Deductions & Discount Reports"}
@@ -711,7 +711,7 @@ export default function PaymentAdviceDashboard() {
                     onClick={handleExportExcel}
                     className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-sm hover:shadow transition"
                   >
-                    <DownloadIcon /> Download Excel
+                    <DownloadIcon /> Export Excel (.csv)
                   </button>
                 </div>
               </div>
@@ -806,8 +806,8 @@ export default function PaymentAdviceDashboard() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-auto">
-                <div>
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-slate-100/70 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
