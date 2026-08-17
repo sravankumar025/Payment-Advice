@@ -2,26 +2,66 @@ import React, { useState, useEffect, useMemo } from "react";
 
 // --- SVG Icons ---
 const SearchIcon = () => (
-  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  <svg
+    className="w-4 h-4 text-slate-400"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+    />
   </svg>
 );
 
 const DownloadIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+    />
   </svg>
 );
 
 const PrintIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+    />
   </svg>
 );
 
 const PlusIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M12 4v16m8-8H4"
+    />
   </svg>
 );
 
@@ -40,7 +80,7 @@ const INITIAL_DEDUCTIONS = [
     shortage: 1200.0,
     lateLoad: 300.0,
     rateDiff: 2500.0,
-    other1: 0.0
+    other1: 0.0,
   },
   {
     id: 2,
@@ -56,7 +96,7 @@ const INITIAL_DEDUCTIONS = [
     shortage: 0.0,
     lateLoad: 150.0,
     rateDiff: 0.0,
-    other1: 100.0
+    other1: 100.0,
   },
   {
     id: 3,
@@ -72,7 +112,7 @@ const INITIAL_DEDUCTIONS = [
     shortage: 2100.0,
     lateLoad: 0.0,
     rateDiff: 1800.0,
-    other1: 250.0
+    other1: 250.0,
   },
   {
     id: 4,
@@ -88,7 +128,7 @@ const INITIAL_DEDUCTIONS = [
     shortage: 850.0,
     lateLoad: 500.0,
     rateDiff: 0.0,
-    other1: 0.0
+    other1: 0.0,
   },
   {
     id: 5,
@@ -104,8 +144,8 @@ const INITIAL_DEDUCTIONS = [
     shortage: 0.0,
     lateLoad: 0.0,
     rateDiff: 1200.0,
-    other1: 150.0
-  }
+    other1: 150.0,
+  },
 ];
 
 export default function () {
@@ -139,9 +179,9 @@ export default function () {
     shortage: "",
     lateLoad: "",
     rateDiff: "",
-    other1: ""
+    other1: "",
   });
-  
+
   const showNotification = (msg, type = "info") => {
     setNotification({ msg, type });
     setTimeout(() => setNotification(null), 3500);
@@ -154,12 +194,16 @@ export default function () {
   }, [deductions]);
 
   const parties = useMemo(() => {
-    const set = new Set(deductions.map((item) => item.partyName).filter(Boolean));
+    const set = new Set(
+      deductions.map((item) => item.partyName).filter(Boolean),
+    );
     return ["ALL", ...Array.from(set)];
   }, [deductions]);
 
   const brokers = useMemo(() => {
-    const set = new Set(deductions.map((item) => item.brokerName).filter(Boolean));
+    const set = new Set(
+      deductions.map((item) => item.brokerName).filter(Boolean),
+    );
     return ["ALL", ...Array.from(set)];
   }, [deductions]);
 
@@ -167,13 +211,16 @@ export default function () {
   const filteredData = useMemo(() => {
     return deductions.filter((item) => {
       const matchesLocation =
-        selectedLocation === "ALL" || item.station.toLowerCase() === selectedLocation.toLowerCase();
+        selectedLocation === "ALL" ||
+        item.station.toLowerCase() === selectedLocation.toLowerCase();
 
       const matchesParty =
-        selectedParty === "ALL" || item.partyName.toLowerCase() === selectedParty.toLowerCase();
+        selectedParty === "ALL" ||
+        item.partyName.toLowerCase() === selectedParty.toLowerCase();
 
       const matchesBroker =
-        selectedBroker === "ALL" || item.brokerName.toLowerCase() === selectedBroker.toLowerCase();
+        selectedBroker === "ALL" ||
+        item.brokerName.toLowerCase() === selectedBroker.toLowerCase();
 
       let matchesDate = true;
       if (enableDateFilter) {
@@ -183,7 +230,15 @@ export default function () {
 
       return matchesLocation && matchesParty && matchesBroker && matchesDate;
     });
-  }, [deductions, selectedLocation, selectedParty, selectedBroker, enableDateFilter, fromDate, toDate]);
+  }, [
+    deductions,
+    selectedLocation,
+    selectedParty,
+    selectedBroker,
+    enableDateFilter,
+    fromDate,
+    toDate,
+  ]);
 
   // Compute column totals
   const totals = useMemo(() => {
@@ -195,9 +250,17 @@ export default function () {
         shortage: acc.shortage + (Number(item.shortage) || 0),
         lateLoad: acc.lateLoad + (Number(item.lateLoad) || 0),
         rateDiff: acc.rateDiff + (Number(item.rateDiff) || 0),
-        other1: acc.other1 + (Number(item.other1) || 0)
+        other1: acc.other1 + (Number(item.other1) || 0),
       }),
-      { cashDisc: 0, unloading: 0, cashPaid: 0, shortage: 0, lateLoad: 0, rateDiff: 0, other1: 0 }
+      {
+        cashDisc: 0,
+        unloading: 0,
+        cashPaid: 0,
+        shortage: 0,
+        lateLoad: 0,
+        rateDiff: 0,
+        other1: 0,
+      },
     );
   }, [filteredData]);
 
@@ -236,7 +299,7 @@ export default function () {
       "Late Load",
       "Rate Diff",
       "Other1",
-      "Total Deductions"
+      "Total Deductions",
     ];
 
     const rows = filteredData.map((d) => {
@@ -262,7 +325,7 @@ export default function () {
         d.lateLoad.toFixed(2),
         d.rateDiff.toFixed(2),
         d.other1.toFixed(2),
-        rowTotal.toFixed(2)
+        rowTotal.toFixed(2),
       ];
     });
 
@@ -279,14 +342,19 @@ export default function () {
       totals.lateLoad.toFixed(2),
       totals.rateDiff.toFixed(2),
       totals.other1.toFixed(2),
-      overallTotal.toFixed(2)
+      overallTotal.toFixed(2),
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Deductions_Report_${fromDate}_to_${toDate}.csv`);
+    link.setAttribute(
+      "download",
+      `Deductions_Report_${fromDate}_to_${toDate}.csv`,
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -323,7 +391,7 @@ export default function () {
       shortage: parseFloat(newEntry.shortage) || 0,
       lateLoad: parseFloat(newEntry.lateLoad) || 0,
       rateDiff: parseFloat(newEntry.rateDiff) || 0,
-      other1: parseFloat(newEntry.other1) || 0
+      other1: parseFloat(newEntry.other1) || 0,
     };
 
     setDeductions([...deductions, newItem]);
@@ -340,13 +408,13 @@ export default function () {
       shortage: "",
       lateLoad: "",
       rateDiff: "",
-      other1: ""
+      other1: "",
     });
     showNotification("New Deduction record saved successfully!");
   };
 
   return (
-    <div className="flex flex-col h-screen bg-slate-100 font-sans text-slate-800 overflow-hidden">
+    <div className="flex flex-col h-full bg-slate-100 font-sans text-slate-800 overflow-hidden">
       {/* Notification Banner */}
       {notification && (
         <div className="fixed top-4 right-4 z-50 px-4 py-2.5 rounded-xl shadow-lg bg-slate-900 text-white text-xs font-semibold flex items-center gap-2 animate-bounce">
@@ -358,19 +426,22 @@ export default function () {
       {/* Top Application Title Header Bar */}
       <div className="bg-white px-6 py-3 border-b border-slate-200 flex items-center justify-between shrink-0 shadow-xs">
         <div className="text-center">
-          <h2 className="text-xl font-black text-slate-900 tracking-tight">Deductions Report</h2>
+          <h2 className="text-xl font-black text-slate-900 tracking-tight">
+            Deductions Report
+          </h2>
         </div>
       </div>
 
       {/* Legacy Desktop Form Control Bar (Exact matching the uploaded image layout) */}
       <div className="bg-slate-200/90 border-b border-slate-300 px-6 py-3 shrink-0 shadow-xs text-xs">
         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-          
           {/* Left Controls Column: Dropdowns & Date Range */}
           <div className="space-y-2 flex-1 max-w-2xl">
             {/* Select Location Dropdown */}
             <div className="flex items-center gap-3">
-              <label className="w-32 text-right font-medium text-slate-700">Select Location</label>
+              <label className="w-32 text-right font-medium text-slate-700">
+                Select Location
+              </label>
               <select
                 value={selectedLocation}
                 onChange={(e) => setSelectedLocation(e.target.value)}
@@ -386,7 +457,9 @@ export default function () {
 
             {/* Select Party Name Dropdown */}
             <div className="flex items-center gap-3">
-              <label className="w-32 text-right font-medium text-slate-700">Select Party Name</label>
+              <label className="w-32 text-right font-medium text-slate-700">
+                Select Party Name
+              </label>
               <select
                 value={selectedParty}
                 onChange={(e) => setSelectedParty(e.target.value)}
@@ -402,7 +475,9 @@ export default function () {
 
             {/* Select Broker Name Dropdown */}
             <div className="flex items-center gap-3">
-              <label className="w-32 text-right font-medium text-slate-700">Select Broker Name</label>
+              <label className="w-32 text-right font-medium text-slate-700">
+                Select Broker Name
+              </label>
               <select
                 value={selectedBroker}
                 onChange={(e) => setSelectedBroker(e.target.value)}
@@ -426,7 +501,10 @@ export default function () {
                   onChange={(e) => setEnableDateFilter(e.target.checked)}
                   className="rounded text-indigo-600 focus:ring-slate-500"
                 />
-                <label htmlFor="selectDateChk" className="font-medium text-slate-700 cursor-pointer">
+                <label
+                  htmlFor="selectDateChk"
+                  className="font-medium text-slate-700 cursor-pointer"
+                >
                   Select Date
                 </label>
               </div>
@@ -457,8 +535,10 @@ export default function () {
           <div className="flex flex-col items-end gap-3">
             {/* Print Advice Fieldset Box */}
             <fieldset className="border border-slate-400 rounded-md p-2 bg-slate-100/60 shadow-xs flex items-center gap-2">
-              <legend className="px-1 text-[11px] font-semibold text-slate-600 uppercase">Print Advice</legend>
-              
+              <legend className="px-1 text-[11px] font-semibold text-slate-600 uppercase">
+                Print Advice
+              </legend>
+
               <span className="font-semibold text-slate-700">TNo From</span>
               <input
                 type="text"
@@ -487,7 +567,6 @@ export default function () {
 
             {/* Top Command Bar Buttons */}
             <div className="flex items-center gap-2 pt-2">
-
               <button
                 onClick={() => showNotification("Refreshed deductions report.")}
                 className="px-4 py-1.5 bg-slate-100 hover:bg-white border border-slate-300 text-slate-800 font-semibold rounded text-xs shadow-xs transition"
@@ -510,28 +589,49 @@ export default function () {
               </button>
             </div>
           </div>
-
         </div>
       </div>
 
       {/* Grid Container */}
       <div className="flex-1 p-4 flex flex-col overflow-hidden">
         <div className="flex-1 bg-white border border-slate-300 rounded shadow-sm overflow-auto flex flex-col justify-between">
-          <table className="w-full text-left border-collapse min-w-[950px] overflow-auto">
+          <table className="w-full text-left border-collapse min-w-[950px]">
             <thead className="sticky top-0 bg-slate-100 border-b border-slate-300 text-xs font-bold text-slate-700 shadow-xs z-10">
               <tr>
-                <th className="py-2 px-3 border-r border-slate-300 text-center w-24">Date</th>
-                <th className="py-2 px-3 border-r border-slate-300 font-mono w-24">TNo.</th>
-                <th className="py-2 px-3 border-r border-slate-300 min-w-[180px]">Name of Party</th>
+                <th className="py-2 px-3 border-r border-slate-300 text-center w-24">
+                  Date
+                </th>
+                <th className="py-2 px-3 border-r border-slate-300 font-mono w-24">
+                  TNo.
+                </th>
+                <th className="py-2 px-3 border-r border-slate-300 min-w-[180px]">
+                  Name of Party
+                </th>
                 <th className="py-2 px-3 border-r border-slate-300">Station</th>
-                <th className="py-2 px-3 border-r border-slate-300 text-right">Cash Disc</th>
-                <th className="py-2 px-3 border-r border-slate-300 text-right">Unloading</th>
-                <th className="py-2 px-3 border-r border-slate-300 text-right">Cash Paid</th>
-                <th className="py-2 px-3 border-r border-slate-300 text-right">Shortage</th>
-                <th className="py-2 px-3 border-r border-slate-300 text-right">Late Load</th>
-                <th className="py-2 px-3 border-r border-slate-300 text-right">Rate Diff</th>
-                <th className="py-2 px-3 text-right">Other1</th>
-                <th className="py-2 px-3 text-right">Other2</th>
+                <th className="py-2 px-3 border-r border-slate-300 text-right">
+                  Cash Disc
+                </th>
+                <th className="py-2 px-3 border-r border-slate-300 text-right">
+                  Unloading
+                </th>
+                <th className="py-2 px-3 border-r border-slate-300 text-right">
+                  Cash Paid
+                </th>
+                <th className="py-2 px-3 border-r border-slate-300 text-right">
+                  Shortage
+                </th>
+                <th className="py-2 px-3 border-r border-slate-300 text-right">
+                  Late Load
+                </th>
+                <th className="py-2 px-3 border-r border-slate-300 text-right">
+                  Rate Diff
+                </th>
+                <th className="py-2 px-3 border-r border-slate-300 text-right">
+                  Other1
+                </th>
+                <th className="py-2 px-3 border-r border-slate-300 text-right">
+                  Other2
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-xs font-medium text-slate-800">
@@ -576,7 +676,8 @@ export default function () {
               ) : (
                 <tr>
                   <td colSpan={11} className="py-12 text-center text-slate-400">
-                    No deduction records found matching the selected filter criteria.
+                    No deduction records found matching the selected filter
+                    criteria.
                   </td>
                 </tr>
               )}
@@ -584,12 +685,14 @@ export default function () {
           </table>
 
           {/* Total Summary Footer Row */}
-          <div className="sticky bottom-0 bg-yellow-100/90 border-t-2 border-slate-300 p-2.5 flex items-center justify-between text-xs font-bold text-slate-900 z-10 shadow-inner">
-            <span className="uppercase tracking-wider">Totals ({filteredData.length} Records)</span>
-            <div className="flex items-center gap-6 font-mono">
-              <div className="bg-white px-3 py-1 border border-slate-300 rounded shadow-xs font-black text-sm text-indigo-900">
-                Total: ₹{overallTotal.toFixed(2)}
-              </div>
+        </div>
+        <div className="sticky bottom-0 bg-yellow-100/90 border-t-2 border-slate-300 p-2.5 flex items-center justify-between text-xs font-bold text-slate-900 z-10 shadow-inner">
+          <span className="uppercase tracking-wider">
+            Totals ({filteredData.length} Records)
+          </span>
+          <div className="flex items-center gap-6 font-mono">
+            <div className="bg-white px-3 py-1 border border-slate-300 rounded shadow-xs font-black text-sm text-indigo-900">
+              Total: ₹{overallTotal.toFixed(2)}
             </div>
           </div>
         </div>
