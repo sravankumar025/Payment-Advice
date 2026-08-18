@@ -688,7 +688,7 @@ export default function PaymentAdviceDashboard() {
         </header>
 
         {/* Main Body Content */}
-        <main className="p-4 sm:p-6 flex-1 overflow-y-auto max-w-full">
+        <main className="p-4 sm:p-6 flex-1 overflow-y-auto max-w-full space-y-4">
           {activeView !== "dashboard" ? (
             <div className="w-full min-h-[500px] bg-white rounded-2xl border border-dashed border-slate-300 shadow-sm flex flex-col p-8 text-center text-slate-400">
               <div className="flex-1 w-full h-full overflow-auto text-sm font-semibold text-slate-600 capitalize">
