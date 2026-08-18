@@ -153,9 +153,10 @@ export default function () {
   const [selectedLocation, setSelectedLocation] = useState("ALL");
   const [selectedParty, setSelectedParty] = useState("ALL");
   const [selectedBroker, setSelectedBroker] = useState("ALL");
-  const [enableDateFilter, setEnableDateFilter] = useState(true);
-  const [fromDate, setFromDate] = useState("2026-08-14");
-  const [toDate, setToDate] = useState("2026-08-14");
+  const [enableDateFilter, setEnableDateFilter] = useState(false);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
 
   // Print Advice TNo range state
   const [tNoFrom, setTNoFrom] = useState("");
@@ -209,6 +210,8 @@ export default function () {
 
   // Filter dataset based on controls
   const filteredData = useMemo(() => {
+
+    if (!hasSearched) return [];
     return deductions.filter((item) => {
       const matchesLocation =
         selectedLocation === "ALL" ||
@@ -238,6 +241,7 @@ export default function () {
     enableDateFilter,
     fromDate,
     toDate,
+    hasSearched,
   ]);
 
   // Compute column totals
@@ -273,10 +277,11 @@ export default function () {
     setSelectedParty("ALL");
     setSelectedBroker("ALL");
     setEnableDateFilter(true);
-    setFromDate("2026-08-14");
-    setToDate("2026-08-14");
+    setFromDate("");
+    setToDate("");
     setTNoFrom("");
     setTNoTo("");
+    setHasSearched(false);
     showNotification("Filters reset to default.");
   };
 
@@ -568,7 +573,10 @@ export default function () {
             {/* Top Command Bar Buttons */}
             <div className="flex items-center gap-2 pt-2">
               <button
-                onClick={() => showNotification("Refreshed deductions report.")}
+                onClick={() => {
+                  setHasSearched(true);
+                  showNotification("Filtered deductions report.");
+                }}
                 className="px-4 py-1.5 bg-slate-100 hover:bg-white border border-slate-300 text-slate-800 font-semibold rounded text-xs shadow-xs transition"
               >
                 Show
