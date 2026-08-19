@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import RtgsTransactionReports from "./RtgsTransactionReports";
 import DeductionsReport from "./DeductionsReports";
+import PartyEntryForm from "./PartyEntryForm";
+
 const SearchIcon = () => (
   <svg
     className="w-4 h-4 text-slate-400"
@@ -121,6 +123,12 @@ const MenuIcon = () => (
   </svg>
 );
 
+const UserPlusIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+  </svg>
+);
+
 const DashboardIcon = () => (
   <svg
     className="w-5 h-5"
@@ -223,6 +231,13 @@ const exportToExcelCSV = (filename, headers, rows) => {
     const str = String(val).replace(/"/g, '""');
     return `"${str}"`;
   };
+  const [activeTab, setActiveTab] = useState("rtgs");
+  
+  const navItems = [
+  { id: "rtgs", label: "RTGS Reports", icon: "" },
+  { id: "deductions", label: "Deductions Report", icon: "" },
+  { id: "party-entry", label: "Party Entry Form", icon: "" },
+];
 
   const csvContent = [
     headers.map(formatValue).join(","),
@@ -466,6 +481,13 @@ export default function PaymentAdviceDashboard() {
       description: "Overview & All Advices",
     },
     {
+      id: "party-entry",
+      label: "Party Entry Form",
+      icon: <UserPlusIcon />,
+      route: "/party-entry",
+      description: "Add & Manage Party Masters",
+    },
+    {
       id: "rtgs",
       label: "RTGS Reports",
       icon: <BankIcon />,
@@ -690,14 +712,10 @@ export default function PaymentAdviceDashboard() {
         {/* Main Body Content */}
         <main className="p-4 sm:p-6 flex-1 overflow-y-auto max-w-full space-y-4">
           {activeView !== "dashboard" ? (
-            <div className="w-full min-h-[500px] bg-white rounded-2xl border border-dashed border-slate-300 shadow-sm flex flex-col p-8 text-center text-slate-400">
-              <div className="flex-1 w-full h-full overflow-auto text-sm font-semibold text-slate-600 capitalize">
-                {activeView === "rtgs" ? (
-                  <RtgsTransactionReports />
-                ) : (
-                  <DeductionsReport />
-                )}
-              </div>
+            <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+              {activeView === "rtgs" && <RtgsTransactionReports />}
+              {activeView === "deductions" && <DeductionsReport />}
+              {activeView === "party-entry" && <PartyEntryForm />}
             </div>
           ) : (
             <>
