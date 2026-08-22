@@ -7,8 +7,8 @@ const { Pool } = require("pg");
 const pool = new Pool({
   user: process.env.PGUSER || "postgres",
   host: process.env.PGHOST || "localhost",
-  database: process.env.PGDATABASE || "payment_advice_db",
-  password: process.env.PGPASSWORD || "Sravan@3025", //
+  database: process.env.PGDATABASE || "paymentadvice",
+  password: process.env.PGPASSWORD || "Sharmaji", //
   port: process.env.PGPORT || 5432,
 });
 
@@ -72,6 +72,17 @@ async function initDb() {
         remarks TEXT
       )
     `);
+
+    await pool.query(`CREATE TABLE IF NOT EXISTS master_entry (
+        id SERIAL PRIMARY KEY,
+        rtgs_account_no VARCHAR(30),
+        shalimar_account_no VARCHAR(30),
+        ifsc_code VARCHAR(11),
+        unloading_charges NUMERIC(12,2),      
+        service_tax NUMERIC(5,2)
+      )`);
+
+
 
     console.log("PostgreSQL Database schema initialized.");
   } catch (err) {
@@ -263,10 +274,6 @@ ipcMain.handle("delete-advice", async (event, id) => {
 ipcMain.handle("delete-advices", async () => {
   const client = await pool.connect();
   try {
-    await client.query("BEGIN");
-
-    await client.query("DELETE FROM items");
-    await client.query("DELETE FROM qualityDiffs");
     const result = await client.query("DELETE FROM advices");
 
     await client.query("COMMIT");
@@ -287,7 +294,50 @@ ipcMain.handle("delete-advices", async () => {
     client.release();
   }
 });
+ipcMain.handle("save-master-entry", async (event, data) => {
+   const client = await pool.connect();
+  try {
+    await client.query(
+      `UPDATE master_entry SET 
+      rtgs_account_no = $1, 
+      shalimar_account_no = $2, 
+      ifsc_code = $3, 
+      unloading_charges = $4, 
+      service_tax = $5 
+     WHERE id = 1`, [
+      data.rtgsAccountNo,
+      data.shalimarAccountNo,
+      data.ifscCode,
+      data.unloadingCharges,
+      data.serviceTax
+    ]
+    );
+    const updatedRowResult = await client.query("SELECT * FROM master_entry WHERE id = 1");
+    const updatedRow = updatedRowResult.rows[0];
 
+    mainWindow.webContents.send("master-data", updatedRow);
+    if (masterWindow) {
+      masterWindow.close();
+      masterWindow = null;
+    }
+
+    return { success: true };
+  }
+  catch (err) {
+    console.log("error in saving master_entry_form")
+    return { success: false, error: err.message };
+  }
+
+});
+
+
+ipcMain.handle("get-master-entry", async () => {
+  const client = await pool.connect();
+  const resultMasterEntry = await client.query("SELECT * FROM master_entry WHERE id = 1");
+  const row = resultMasterEntry.rows[0] || null;
+  console.log("Data from Database :", row);
+  return row;
+});
 // --- Window Setup ---
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -398,8 +448,8 @@ function openMasterEntryWindow() {
       contextIsolation: true,
     },
   });
-   
-   masterWindow.setMenu(null);
+
+  masterWindow.setMenu(null);
   const masterUrl = isDev
     ? "http://localhost:5173/master-entry"
     : `file://${path.join(__dirname, "../build/index.html")}/master-entry`;
