@@ -13,7 +13,7 @@ const pool = new Pool({
 });
 
 let mainWindow;
-
+let masterWindow;
 // --- Schema Setup ---
 async function initDb() {
   try {
@@ -295,7 +295,7 @@ ipcMain.handle("delete-advices", async () => {
   }
 });
 ipcMain.handle("save-master-entry", async (event, data) => {
-   const client = await pool.connect();
+  const client = await pool.connect();
   try {
     await client.query(
       `UPDATE master_entry SET 
@@ -318,7 +318,6 @@ ipcMain.handle("save-master-entry", async (event, data) => {
     mainWindow.webContents.send("master-data", updatedRow);
     if (masterWindow) {
       masterWindow.close();
-      masterWindow = null;
     }
 
     return { success: true };
@@ -326,17 +325,23 @@ ipcMain.handle("save-master-entry", async (event, data) => {
   catch (err) {
     console.log("error in saving master_entry_form")
     return { success: false, error: err.message };
+  } finally {
+    client.release(); // Crucial to prevent PG Pool exhaustion
   }
 
 });
 
 
 ipcMain.handle("get-master-entry", async () => {
-  const client = await pool.connect();
-  const resultMasterEntry = await client.query("SELECT * FROM master_entry WHERE id = 1");
-  const row = resultMasterEntry.rows[0] || null;
-  console.log("Data from Database :", row);
-  return row;
+ try {
+    const resultMasterEntry = await pool.query("SELECT * FROM master_entry WHERE id = 1");
+    const row = resultMasterEntry.rows[0] || null;
+    console.log("Data from Database :", row);
+    return row;
+  } catch (err) {
+    console.error("Error fetching master entry:", err);
+    throw err;
+  }
 });
 // --- Window Setup ---
 function createWindow() {
@@ -433,7 +438,7 @@ function createWindow() {
 
 app.whenReady().then(createWindow);
 function openMasterEntryWindow() {
-  const masterWindow = new BrowserWindow({
+  masterWindow = new BrowserWindow({
     width: 450,
     height: 550,
     parent: mainWindow,
@@ -455,6 +460,9 @@ function openMasterEntryWindow() {
     : `file://${path.join(__dirname, "../build/index.html")}/master-entry`;
 
   masterWindow.loadURL(masterUrl);
+  masterWindow.on("closed", () => {
+    masterWindow = null;
+  });
 }
 
 app.on("window-all-closed", () => {
