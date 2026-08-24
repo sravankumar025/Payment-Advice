@@ -3,6 +3,7 @@ const path = require("path");
 const isDev = require("electron-is-dev");
 const fs = require("fs");
 const { Pool } = require("pg");
+const { autoUpdater } = require('electron-updater');
 // Configure PostgreSQL connection pool
 const pool = new Pool({
   user: process.env.PGUSER || "postgres",
@@ -244,9 +245,6 @@ ipcMain.handle("delete-advice", async (event, id) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-
-    // Deleting single advice record.
-    // FK CASCADE constraints will handle linked items and qualityDiffs automatically.
     const result = await client.query("DELETE FROM advices WHERE id = $1", [
       id,
     ]);
@@ -376,7 +374,7 @@ function createWindow() {
 
   const startUrl = isDev
     ? "http://localhost:5173"
-    : `file://${path.join(__dirname, "../build/index.html")}`;
+    : `file://${path.join(__dirname, "index.html")}`;
 
   mainWindow.loadURL(startUrl);
   const menuTemplate = [
@@ -457,7 +455,7 @@ function openMasterEntryWindow() {
   masterWindow.setMenu(null);
   const masterUrl = isDev
     ? "http://localhost:5173/master-entry"
-    : `file://${path.join(__dirname, "../build/index.html")}/master-entry`;
+    : `file://${path.join(__dirname, "index.html")}#/master-entry`;
 
   masterWindow.loadURL(masterUrl);
   masterWindow.on("closed", () => {
@@ -472,3 +470,11 @@ app.on("window-all-closed", () => {
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
+
+app.on("ready",()=>{
+  createWindow();
+  if(!isDev){
+    autoUpdater.checkForUpdatesAndNotify();
+  }
+});
+
